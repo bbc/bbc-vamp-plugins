@@ -5,22 +5,26 @@
 
 
 // Remember to use a different guard symbol in each header!
-#ifndef _MY_PLUGIN_H_
-#define _MY_PLUGIN_H_
+#ifndef _SPECTRAL_H_
+#define _SPECTRAL_H_
 
-#include <math.h>
+#include <iostream>
+#include <cmath>
+#include <complex>
 #include <vector>
 #include <vamp-sdk/Plugin.h>
 
 using std::string;
 using std::vector;
+using std::complex;
+using std::abs;
+using std::cout;
 
-
-class VampDynamics : public Vamp::Plugin
+class VampDynamicsSpectral : public Vamp::Plugin
 {
 public:
-    VampDynamics(float inputSampleRate);
-    virtual ~VampDynamics();
+    VampDynamicsSpectral(float inputSampleRate);
+    virtual ~VampDynamicsSpectral();
 
     string getIdentifier() const;
     string getName() const;
@@ -47,6 +51,7 @@ public:
 
     bool initialise(size_t channels, size_t stepSize, size_t blockSize);
     void reset();
+    void calculateBandFreqs();
 
     FeatureSet process(const float *const *inputBuffers,
                        Vamp::RealTime timestamp);
@@ -55,8 +60,9 @@ public:
 
 protected:
     int m_blockSize, m_stepSize;
-    float threshRatio;
-    vector<float> rmsEnergy;
+    float m_sampleRate;
+    int numBands;
+    float *bandHighFreq;
 };
 
 

@@ -21,11 +21,11 @@ PLUGIN_LIBRARY_NAME := vampdynamics
 
 # Edit this to list the .cpp or .c files in your plugin project
 #
-PLUGIN_SOURCES := VampDynamics.cpp plugins.cpp
+PLUGIN_SOURCES := VampDynamicsSpectral.cpp VampDynamicsTemporal.cpp plugins.cpp
 
 # Edit this to list the .h files in your plugin project
 #
-PLUGIN_HEADERS := VampDynamics.h
+PLUGIN_HEADERS := VampDynamicsSpectral.h VampDynamicsTemporal.h
 
 # Edit this to the location of the Vamp plugin SDK, relative to your
 # project directory

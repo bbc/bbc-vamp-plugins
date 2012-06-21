@@ -7,12 +7,14 @@
 #include <vamp/vamp.h>
 #include <vamp-sdk/PluginAdapter.h>
 
-#include "VampDynamics.h"
+#include "VampDynamicsSpectral.h"
+#include "VampDynamicsTemporal.h"
 
 
 // Declare one static adapter here for each plugin class in this library.
 
-static Vamp::PluginAdapter<VampDynamics> myPluginAdapter;
+static Vamp::PluginAdapter<VampDynamicsTemporal> dynamicsTemporal;
+static Vamp::PluginAdapter<VampDynamicsSpectral> dynamicsSpectral;
 
 
 // This is the entry-point for the library, and the only function that
@@ -29,7 +31,8 @@ vampGetPluginDescriptor(unsigned int version, unsigned int index)
     // library.)
 
     switch (index) {
-    case  0: return myPluginAdapter.getDescriptor();
+    case  0: return dynamicsTemporal.getDescriptor();
+    case  1: return dynamicsSpectral.getDescriptor();
     default: return 0;
     }
 }
