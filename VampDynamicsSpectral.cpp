@@ -83,18 +83,36 @@ VampDynamicsSpectral::getParameterDescriptors() const
 {
     ParameterList list;
 
+    ParameterDescriptor numBandsParam;
+    numBandsParam.identifier = "numBands";
+    numBandsParam.name = "Sub-bands";
+    numBandsParam.description = "Number of sub-bands.";
+    numBandsParam.unit = "";
+    numBandsParam.minValue = 2;
+    numBandsParam.maxValue = 50;
+    numBandsParam.defaultValue = 7;
+    numBandsParam.isQuantized = true;
+    numBandsParam.quantizeStep = 1.0;
+    list.push_back(numBandsParam);
+
     return list;
 }
 
 float
 VampDynamicsSpectral::getParameter(string identifier) const
 {
+    if (identifier == "numBands")
+        return numBands;
     return 0;
 }
 
 void
 VampDynamicsSpectral::setParameter(string identifier, float value)
 {
+    if (identifier == "numBands") {
+    	numBands = value;
+    	calculateBandFreqs();
+    }
 }
 
 VampDynamicsSpectral::ProgramList
