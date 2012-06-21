@@ -195,7 +195,6 @@ VampDynamicsSpectral::calculateBandFreqs()
 	for (int k=0; k<numBands; k++)
 	{
 		bandHighFreq[k] = m_sampleRate / pow(2.f,numBands-k);
-		cout << bandHighFreq[k] << "\n";
 	}
 }
 
