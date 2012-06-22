@@ -5,8 +5,8 @@
 
 
 // Remember to use a different guard symbol in each header!
-#ifndef _SPECTRAL_H_
-#define _SPECTRAL_H_
+#ifndef _INTENSITY_H_
+#define _INTENSITY_H_
 
 #include <iostream>
 #include <cmath>
@@ -20,11 +20,11 @@ using std::complex;
 using std::abs;
 using std::cout;
 
-class VampDynamicsSpectral : public Vamp::Plugin
+class Intensity : public Vamp::Plugin
 {
 public:
-    VampDynamicsSpectral(float inputSampleRate);
-    virtual ~VampDynamicsSpectral();
+    Intensity(float inputSampleRate);
+    virtual ~Intensity();
 
     string getIdentifier() const;
     string getName() const;

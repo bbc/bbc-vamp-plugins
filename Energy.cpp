@@ -1,83 +1,83 @@
-#include "VampDynamicsTemporal.h"
+#include "Energy.h"
 
-VampDynamicsTemporal::VampDynamicsTemporal(float inputSampleRate):Plugin(inputSampleRate)
+Energy::Energy(float inputSampleRate):Plugin(inputSampleRate)
 {
 	threshRatio = 1;
 	useRoot = true;
 }
 
-VampDynamicsTemporal::~VampDynamicsTemporal()
+Energy::~Energy()
 {
 }
 
 string
-VampDynamicsTemporal::getIdentifier() const
+Energy::getIdentifier() const
 {
     return "dynamics-temporal";
 }
 
 string
-VampDynamicsTemporal::getName() const
+Energy::getName() const
 {
     return "Dynamics";
 }
 
 string
-VampDynamicsTemporal::getDescription() const
+Energy::getDescription() const
 {
     return "";
 }
 
 string
-VampDynamicsTemporal::getMaker() const
+Energy::getMaker() const
 {
     return "BBC Research and Development";
 }
 
 int
-VampDynamicsTemporal::getPluginVersion() const
+Energy::getPluginVersion() const
 {
     return 2;
 }
 
 string
-VampDynamicsTemporal::getCopyright() const
+Energy::getCopyright() const
 {
     return "(c) 2012 British Broadcasting Corporation";
 }
 
-VampDynamicsTemporal::InputDomain
-VampDynamicsTemporal::getInputDomain() const
+Energy::InputDomain
+Energy::getInputDomain() const
 {
     return TimeDomain;
 }
 
 size_t
-VampDynamicsTemporal::getPreferredBlockSize() const
+Energy::getPreferredBlockSize() const
 {
     return 1024;
 }
 
 size_t 
-VampDynamicsTemporal::getPreferredStepSize() const
+Energy::getPreferredStepSize() const
 {
     return 1024;
 }
 
 size_t
-VampDynamicsTemporal::getMinChannelCount() const
+Energy::getMinChannelCount() const
 {
     return 1;
 }
 
 size_t
-VampDynamicsTemporal::getMaxChannelCount() const
+Energy::getMaxChannelCount() const
 {
     return 1;
 }
 
-VampDynamicsTemporal::ParameterList
-VampDynamicsTemporal::getParameterDescriptors() const
+Energy::ParameterList
+Energy::getParameterDescriptors() const
 {
     ParameterList list;
 
@@ -108,7 +108,7 @@ VampDynamicsTemporal::getParameterDescriptors() const
 }
 
 float
-VampDynamicsTemporal::getParameter(string identifier) const
+Energy::getParameter(string identifier) const
 {
     if (identifier == "threshold") {
         return threshRatio;
@@ -121,7 +121,7 @@ VampDynamicsTemporal::getParameter(string identifier) const
 }
 
 void
-VampDynamicsTemporal::setParameter(string identifier, float value)
+Energy::setParameter(string identifier, float value)
 {
     if (identifier == "threshold") {
     	threshRatio = value;
@@ -135,8 +135,8 @@ VampDynamicsTemporal::setParameter(string identifier, float value)
     }
 }
 
-VampDynamicsTemporal::ProgramList
-VampDynamicsTemporal::getPrograms() const
+Energy::ProgramList
+Energy::getPrograms() const
 {
     ProgramList list;
 
@@ -144,18 +144,18 @@ VampDynamicsTemporal::getPrograms() const
 }
 
 string
-VampDynamicsTemporal::getCurrentProgram() const
+Energy::getCurrentProgram() const
 {
     return "";
 }
 
 void
-VampDynamicsTemporal::selectProgram(string name)
+Energy::selectProgram(string name)
 {
 }
 
-VampDynamicsTemporal::OutputList
-VampDynamicsTemporal::getOutputDescriptors() const
+Energy::OutputList
+Energy::getOutputDescriptors() const
 {
     OutputList list;
 
@@ -189,7 +189,7 @@ VampDynamicsTemporal::getOutputDescriptors() const
 }
 
 bool
-VampDynamicsTemporal::initialise(size_t channels, size_t stepSize, size_t blockSize)
+Energy::initialise(size_t channels, size_t stepSize, size_t blockSize)
 {
     if (channels < getMinChannelCount() ||
 	channels > getMaxChannelCount()) return false;
@@ -202,13 +202,13 @@ VampDynamicsTemporal::initialise(size_t channels, size_t stepSize, size_t blockS
 }
 
 void
-VampDynamicsTemporal::reset()
+Energy::reset()
 {
 	rmsEnergy.clear();
 }
 
-VampDynamicsTemporal::FeatureSet
-VampDynamicsTemporal::process(const float *const *inputBuffers, Vamp::RealTime timestamp)
+Energy::FeatureSet
+Energy::process(const float *const *inputBuffers, Vamp::RealTime timestamp)
 {
 	float totalEnergy;
 	for (int i=0; i<m_blockSize; i++)
@@ -230,8 +230,8 @@ VampDynamicsTemporal::process(const float *const *inputBuffers, Vamp::RealTime t
     return output;
 }
 
-VampDynamicsTemporal::FeatureSet
-VampDynamicsTemporal::getRemainingFeatures()
+Energy::FeatureSet
+Energy::getRemainingFeatures()
 {
 	// find average of RMS energy values
 	float total;

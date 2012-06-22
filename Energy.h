@@ -5,8 +5,8 @@
 
 
 // Remember to use a different guard symbol in each header!
-#ifndef _TEMPORAL_H_
-#define _TEMPORAL_H_
+#ifndef _ENERGY_H_
+#define _ENERGY_H_
 
 #include <math.h>
 #include <vector>
@@ -16,11 +16,11 @@ using std::string;
 using std::vector;
 
 
-class VampDynamicsTemporal : public Vamp::Plugin
+class Energy : public Vamp::Plugin
 {
 public:
-    VampDynamicsTemporal(float inputSampleRate);
-    virtual ~VampDynamicsTemporal();
+    Energy(float inputSampleRate);
+    virtual ~Energy();
 
     string getIdentifier() const;
     string getName() const;

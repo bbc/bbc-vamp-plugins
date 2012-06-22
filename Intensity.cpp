@@ -1,6 +1,6 @@
-#include "VampDynamicsSpectral.h"
+#include "Intensity.h"
 
-VampDynamicsSpectral::VampDynamicsSpectral(float inputSampleRate):Plugin(inputSampleRate)
+Intensity::Intensity(float inputSampleRate):Plugin(inputSampleRate)
 {
 	m_sampleRate = inputSampleRate;
 	numBands = 7;
@@ -8,78 +8,78 @@ VampDynamicsSpectral::VampDynamicsSpectral(float inputSampleRate):Plugin(inputSa
 	calculateBandFreqs();
 }
 
-VampDynamicsSpectral::~VampDynamicsSpectral()
+Intensity::~Intensity()
 {
 }
 
 string
-VampDynamicsSpectral::getIdentifier() const
+Intensity::getIdentifier() const
 {
     return "dynamics-spectral";
 }
 
 string
-VampDynamicsSpectral::getName() const
+Intensity::getName() const
 {
     return "Dynamics";
 }
 
 string
-VampDynamicsSpectral::getDescription() const
+Intensity::getDescription() const
 {
     return "";
 }
 
 string
-VampDynamicsSpectral::getMaker() const
+Intensity::getMaker() const
 {
     return "BBC Research and Development";
 }
 
 int
-VampDynamicsSpectral::getPluginVersion() const
+Intensity::getPluginVersion() const
 {
     return 1;
 }
 
 string
-VampDynamicsSpectral::getCopyright() const
+Intensity::getCopyright() const
 {
     return "(c) 2012 British Broadcasting Corporation";
 }
 
-VampDynamicsSpectral::InputDomain
-VampDynamicsSpectral::getInputDomain() const
+Intensity::InputDomain
+Intensity::getInputDomain() const
 {
     return FrequencyDomain;
 }
 
 size_t
-VampDynamicsSpectral::getPreferredBlockSize() const
+Intensity::getPreferredBlockSize() const
 {
     return 1024;
 }
 
 size_t 
-VampDynamicsSpectral::getPreferredStepSize() const
+Intensity::getPreferredStepSize() const
 {
     return 1024;
 }
 
 size_t
-VampDynamicsSpectral::getMinChannelCount() const
+Intensity::getMinChannelCount() const
 {
     return 1;
 }
 
 size_t
-VampDynamicsSpectral::getMaxChannelCount() const
+Intensity::getMaxChannelCount() const
 {
     return 1;
 }
 
-VampDynamicsSpectral::ParameterList
-VampDynamicsSpectral::getParameterDescriptors() const
+Intensity::ParameterList
+Intensity::getParameterDescriptors() const
 {
     ParameterList list;
 
@@ -99,7 +99,7 @@ VampDynamicsSpectral::getParameterDescriptors() const
 }
 
 float
-VampDynamicsSpectral::getParameter(string identifier) const
+Intensity::getParameter(string identifier) const
 {
     if (identifier == "numBands")
         return numBands;
@@ -107,7 +107,7 @@ VampDynamicsSpectral::getParameter(string identifier) const
 }
 
 void
-VampDynamicsSpectral::setParameter(string identifier, float value)
+Intensity::setParameter(string identifier, float value)
 {
     if (identifier == "numBands") {
     	numBands = value;
@@ -115,8 +115,8 @@ VampDynamicsSpectral::setParameter(string identifier, float value)
     }
 }
 
-VampDynamicsSpectral::ProgramList
-VampDynamicsSpectral::getPrograms() const
+Intensity::ProgramList
+Intensity::getPrograms() const
 {
     ProgramList list;
 
@@ -124,18 +124,18 @@ VampDynamicsSpectral::getPrograms() const
 }
 
 string
-VampDynamicsSpectral::getCurrentProgram() const
+Intensity::getCurrentProgram() const
 {
     return "";
 }
 
 void
-VampDynamicsSpectral::selectProgram(string name)
+Intensity::selectProgram(string name)
 {
 }
 
-VampDynamicsSpectral::OutputList
-VampDynamicsSpectral::getOutputDescriptors() const
+Intensity::OutputList
+Intensity::getOutputDescriptors() const
 {
     OutputList list;
 
@@ -169,7 +169,7 @@ VampDynamicsSpectral::getOutputDescriptors() const
 }
 
 bool
-VampDynamicsSpectral::initialise(size_t channels, size_t stepSize, size_t blockSize)
+Intensity::initialise(size_t channels, size_t stepSize, size_t blockSize)
 {
     if (channels < getMinChannelCount() ||
 	channels > getMaxChannelCount()) return false;
@@ -182,12 +182,12 @@ VampDynamicsSpectral::initialise(size_t channels, size_t stepSize, size_t blockS
 }
 
 void
-VampDynamicsSpectral::reset()
+Intensity::reset()
 {
 }
 
 void
-VampDynamicsSpectral::calculateBandFreqs()
+Intensity::calculateBandFreqs()
 {
 	delete [] bandHighFreq;
 	bandHighFreq = new float[numBands];
@@ -198,8 +198,8 @@ VampDynamicsSpectral::calculateBandFreqs()
 	}
 }
 
-VampDynamicsSpectral::FeatureSet
-VampDynamicsSpectral::process(const float *const *inputBuffers, Vamp::RealTime timestamp)
+Intensity::FeatureSet
+Intensity::process(const float *const *inputBuffers, Vamp::RealTime timestamp)
 {
 	FeatureSet output;
 	float total = 0;
@@ -256,8 +256,8 @@ VampDynamicsSpectral::process(const float *const *inputBuffers, Vamp::RealTime t
     return output;
 }
 
-VampDynamicsSpectral::FeatureSet
-VampDynamicsSpectral::getRemainingFeatures()
+Intensity::FeatureSet
+Intensity::getRemainingFeatures()
 {
 
 	FeatureSet output;
