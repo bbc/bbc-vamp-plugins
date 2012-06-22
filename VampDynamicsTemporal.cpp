@@ -3,6 +3,7 @@
 VampDynamicsTemporal::VampDynamicsTemporal(float inputSampleRate):Plugin(inputSampleRate)
 {
 	threshRatio = 1;
+	useRoot = true;
 }
 
 VampDynamicsTemporal::~VampDynamicsTemporal()
@@ -36,7 +37,7 @@ VampDynamicsTemporal::getMaker() const
 int
 VampDynamicsTemporal::getPluginVersion() const
 {
-    return 1;
+    return 2;
 }
 
 string
@@ -80,16 +81,28 @@ VampDynamicsTemporal::getParameterDescriptors() const
 {
     ParameterList list;
 
-    ParameterDescriptor d;
-    d.identifier = "threshold";
-    d.name = "Low energy threshold";
-    d.description = "Ratio of threshold to average energy.";
-    d.unit = "";
-    d.minValue = 0;
-    d.maxValue = 10;
-    d.defaultValue = 1;
-    d.isQuantized = false;
-    list.push_back(d);
+    ParameterDescriptor threshold;
+    threshold.identifier = "threshold";
+    threshold.name = "Low energy threshold";
+    threshold.description = "Ratio of threshold to average energy.";
+    threshold.unit = "";
+    threshold.minValue = 0;
+    threshold.maxValue = 10;
+    threshold.defaultValue = 1;
+    threshold.isQuantized = false;
+    list.push_back(threshold);
+
+    ParameterDescriptor root;
+    root.identifier = "root";
+    root.name = "Use root";
+    root.description = "Whether to apply root to energy calc.";
+    root.unit = "";
+    root.minValue = 0;
+    root.maxValue = 1;
+    root.defaultValue = 1;
+    root.isQuantized = true;
+    root.quantizeStep = 1;
+    list.push_back(root);
 
     return list;
 }
@@ -100,6 +113,10 @@ VampDynamicsTemporal::getParameter(string identifier) const
     if (identifier == "threshold") {
         return threshRatio;
     }
+    else if (identifier == "root")
+    {
+    	return useRoot;
+    }
     return 0;
 }
 
@@ -108,6 +125,13 @@ VampDynamicsTemporal::setParameter(string identifier, float value)
 {
     if (identifier == "threshold") {
     	threshRatio = value;
+    }
+    else if (identifier == "root")
+    {
+    	if (value == 1)
+    		useRoot = true;
+    	else
+    		useRoot = false;
     }
 }
 
@@ -192,7 +216,11 @@ VampDynamicsTemporal::process(const float *const *inputBuffers, Vamp::RealTime t
 		totalEnergy += inputBuffers[0][i]*inputBuffers[0][i];
 	}
 
-	float rms = sqrt(totalEnergy / (float)m_blockSize);
+	float rms;
+	if (useRoot)
+		rms = sqrt(totalEnergy / (float)m_blockSize);
+	else
+		rms = totalEnergy / (float)m_blockSize;
 	rmsEnergy.push_back(rms);
 
 	FeatureSet output;

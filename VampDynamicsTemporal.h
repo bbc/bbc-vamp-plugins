@@ -56,6 +56,7 @@ public:
 protected:
     int m_blockSize, m_stepSize;
     float threshRatio;
+    bool useRoot;
     vector<float> rmsEnergy;
 };
 
