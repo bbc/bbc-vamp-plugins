@@ -13,13 +13,13 @@ Energy::~Energy()
 string
 Energy::getIdentifier() const
 {
-    return "dynamics-temporal";
+    return "bbcrd-energy";
 }
 
 string
 Energy::getName() const
 {
-    return "Dynamics";
+    return "Energy";
 }
 
 string

@@ -15,13 +15,13 @@ Intensity::~Intensity()
 string
 Intensity::getIdentifier() const
 {
-    return "dynamics-spectral";
+    return "bbcrd-intensity";
 }
 
 string
 Intensity::getName() const
 {
-    return "Dynamics";
+    return "Intensity";
 }
 
 string

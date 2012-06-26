@@ -21,11 +21,11 @@ PLUGIN_LIBRARY_NAME := bbcrd-vamp-plugins
 
 # Edit this to list the .cpp or .c files in your plugin project
 #
-PLUGIN_SOURCES := Energy.cpp Intensity.cpp plugins.cpp
+PLUGIN_SOURCES := Energy.cpp Intensity.cpp SpectralFlux.cpp Rhythm.cpp plugins.cpp
 
 # Edit this to list the .h files in your plugin project
 #
-PLUGIN_HEADERS := Energy.h Intensity.h
+PLUGIN_HEADERS := Energy.h Intensity.h SpectralFlux.h Rhythm.h
 
 # Edit this to the location of the Vamp plugin SDK, relative to your
 # project directory
