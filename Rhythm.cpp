@@ -19,6 +19,12 @@ Rhythm::Rhythm(float inputSampleRate):Plugin(inputSampleRate)
 	cannyWindow = new float[cannyLength*2 + 1];
 	for (int i=cannyLength*-1; i<cannyLength+1; i++)
 		cannyWindow[i+cannyLength] = canny((float)i);
+
+	// set up parameters
+	threshold = 1;
+	average_window = 200;
+	peak_window = 6;
+	autocor_max = 5.f;
 }
 
 Rhythm::~Rhythm()
@@ -77,7 +83,7 @@ Rhythm::getPreferredBlockSize() const
 size_t 
 Rhythm::getPreferredStepSize() const
 {
-    return 1024;
+    return 256;
 }
 
 size_t
@@ -109,6 +115,52 @@ Rhythm::getParameterDescriptors() const
     numBandsParam.quantizeStep = 1.0;
     list.push_back(numBandsParam);
 
+    ParameterDescriptor thresholdParam;
+    thresholdParam.identifier = "threshold";
+    thresholdParam.name = "Threshold";
+    thresholdParam.description = "For peak picker.";
+    thresholdParam.unit = "";
+    thresholdParam.minValue = 0;
+    thresholdParam.maxValue = 10;
+    thresholdParam.defaultValue = 1;
+    thresholdParam.isQuantized = false;
+    list.push_back(thresholdParam);
+
+    ParameterDescriptor average_windowParam;
+    average_windowParam.identifier = "average_window";
+    average_windowParam.name = "Average window length";
+    average_windowParam.description = "Length of window used for moving average.";
+    average_windowParam.unit = "frames";
+    average_windowParam.minValue = 1;
+    average_windowParam.maxValue = 500;
+    average_windowParam.defaultValue = 200;
+    average_windowParam.isQuantized = true;
+    average_windowParam.quantizeStep = 1.0;
+    list.push_back(average_windowParam);
+
+    ParameterDescriptor peak_windowParam;
+    peak_windowParam.identifier = "peak_window";
+    peak_windowParam.name = "Peak-picking window length";
+    peak_windowParam.description = "Length of window used for peak picking.";
+    peak_windowParam.unit = "frames";
+    peak_windowParam.minValue = 1;
+    peak_windowParam.maxValue = 20;
+    peak_windowParam.defaultValue = 6;
+    peak_windowParam.isQuantized = true;
+    peak_windowParam.quantizeStep = 1.0;
+    list.push_back(peak_windowParam);
+
+    ParameterDescriptor autocor_maxParam;
+    autocor_maxParam.identifier = "autocor_max";
+    autocor_maxParam.name = "Max autocorrelation period";
+    autocor_maxParam.description = "Maximum period rendered for autocorrelation.";
+    autocor_maxParam.unit = "seconds";
+    autocor_maxParam.minValue = 0.1;
+    autocor_maxParam.maxValue = 60;
+    autocor_maxParam.defaultValue = 5;
+    autocor_maxParam.isQuantized = false;
+    list.push_back(autocor_maxParam);
+
     return list;
 }
 
@@ -117,6 +169,14 @@ Rhythm::getParameter(string identifier) const
 {
     if (identifier == "numBands")
         return numBands;
+    else if (identifier == "threshold")
+        return threshold;
+    else if (identifier == "average_window")
+        return average_window;
+    else if (identifier == "peak_window")
+        return peak_window;
+    else if (identifier == "autocor_max")
+        return autocor_max;
     return 0;
 }
 
@@ -126,6 +186,22 @@ Rhythm::setParameter(string identifier, float value)
     if (identifier == "numBands") {
     	numBands = value;
     	calculateBandFreqs();
+    }
+    else if (identifier == "threshold")
+    {
+    	threshold = value;
+    }
+    else if (identifier == "average_window")
+    {
+        average_window = (int)value;
+    }
+    else if (identifier == "peak_window")
+    {
+        peak_window = (int)value;
+    }
+    else if (identifier == "autocor_max")
+    {
+        autocor_max = value;
     }
 }
 
@@ -165,6 +241,55 @@ Rhythm::getOutputDescriptors() const
     onset.sampleType = OutputDescriptor::VariableSampleRate;
     onset.hasDuration = false;
     list.push_back(onset);
+
+    OutputDescriptor average;
+    average.identifier = "average";
+    average.name = "Average";
+    average.description = "Moving average of onset curve.";
+    average.unit = "";
+    average.hasFixedBinCount = true;
+    average.binCount = 1;
+    average.hasKnownExtents = false;
+    average.isQuantized = false;
+    average.sampleType = OutputDescriptor::VariableSampleRate;
+    average.hasDuration = false;
+    list.push_back(average);
+
+    OutputDescriptor diff;
+    diff.identifier = "diff";
+    diff.name = "Difference";
+    diff.description = "Difference between onset and average.";
+    diff.unit = "";
+    diff.hasFixedBinCount = true;
+    diff.binCount = 1;
+    diff.hasKnownExtents = false;
+    diff.isQuantized = false;
+    diff.sampleType = OutputDescriptor::VariableSampleRate;
+    diff.hasDuration = false;
+    list.push_back(diff);
+
+    OutputDescriptor peak;
+    peak.identifier = "peak";
+    peak.name = "Onset event";
+    peak.description = "Peak of onset curve.";
+    peak.unit = "";
+    peak.hasFixedBinCount = true;
+    peak.binCount = 0;
+    peak.sampleType = OutputDescriptor::VariableSampleRate;
+    list.push_back(peak);
+
+    OutputDescriptor autocor;
+    autocor.identifier = "autocor";
+    autocor.name = "Autocorrelation";
+    autocor.description = "Autocorrelation of onset detection curve.";
+    autocor.unit = "";
+    autocor.hasFixedBinCount = true;
+    autocor.binCount = 1;
+    autocor.hasKnownExtents = false;
+    autocor.isQuantized = false;
+    autocor.sampleType = OutputDescriptor::VariableSampleRate;
+    autocor.hasDuration = false;
+    list.push_back(autocor);
 
     return list;
 }
@@ -276,34 +401,189 @@ Rhythm::getRemainingFeatures()
 	}
 
 	// find onset curve by convolving each subband of envelope with canny window
-	Feature f;
-	f.hasTimestamp = true;
-	f.hasDuration = false;
-
-	// for each frame
+	vector<float> onset;
+	float onsetMean = 0;
 	for (int frame=0; frame<frames; frame++)
 	{
 		// reset feature details
-		f.timestamp = Vamp::RealTime::frame2RealTime(frame*m_stepSize,m_sampleRate);
-		f.values.clear();
 		float sum = 0;
 
 		// for each sub-band
 		for (int subBand=0; subBand<numBands; subBand++)
 		{
 			// convolve the canny window with the envelope of that sub-band
-			float result = 0;
 			for (int shift=cannyLength*-1; shift<cannyLength; shift++)
 			{
-				if (frame+shift < frames && frame+shift >= 0)
-					result += envelope.at(frame+shift).at(subBand) * cannyWindow[shift+cannyLength];
+				if (frame+shift >= 0 && frame+shift < frames)
+					sum += envelope.at(frame+shift).at(subBand) * cannyWindow[shift+cannyLength];
 			}
-			sum += result;
 		}
 
 		// save result
-		f.values.push_back(sum);
-		output[0].push_back(f);
+		onset.push_back(sum);
+		onsetMean += sum;
+	}
+	onsetMean = onsetMean / frames;
+
+	// find std dev
+	float onsetStdDev = 0;
+	for (int frame=0; frame<frames; frame++)
+	{
+		onsetStdDev += pow(onset.at(frame) - onsetMean, 2);
+	}
+	onsetStdDev = sqrt(onsetStdDev / frames);
+
+	// normalise and export onset curve
+	Feature f_onset;
+	f_onset.hasTimestamp = true;
+	f_onset.hasDuration = false;
+	for (int frame=0; frame<frames; frame++)
+	{
+		// find timestamp and reset feature
+		f_onset.timestamp = Vamp::RealTime::frame2RealTime(frame*m_stepSize,m_sampleRate);
+		f_onset.values.clear();
+
+		// normalise value
+		onset.at(frame) = (onset.at(frame) - onsetMean) / onsetStdDev;
+
+		// half-wave rectification
+		if (onset.at(frame) < 0) onset.at(frame) = 0;
+
+		// push result out
+		f_onset.values.push_back(onset.at(frame));
+		output[0].push_back(f_onset);
+	}
+
+	// SIMPLE THRESHOLD
+//	Feature f_peak;
+//	f_peak.hasTimestamp = true;
+//	for (int frame=0; frame<frames; frame++)
+//	{
+//		if (onset.at(frame) > 1)
+//		{
+//			f_peak.timestamp = Vamp::RealTime::frame2RealTime(frame*m_stepSize,m_sampleRate);
+//			output[2].push_back(f_peak);
+//		}
+//	}
+
+	// DIXON METHOD
+//	int window = 3;
+//	int meanMultiplier = 3;
+////	float threshold = 0.1;
+//	Feature f_peak;
+//	f_peak.hasTimestamp = true;
+//	for (int frame=0; frame<frames; frame++)
+//	{
+//		bool success = true;
+//
+//		// highest value within window
+//		for (int i=window*-1; i<window+1; i++)
+//		{
+//			if (frame+i >= 0 && frame+i < frames)
+//				if (onset.at(frame+i) > onset.at(frame)) success = false;
+//		}
+//
+//		// higher than mean + threshold within asymmetric window
+//		float mean = 0;
+//		for (int i=meanMultiplier*window*-1; i<window+1; i++)
+//		{
+//			if (frame+i >= 0 && frame+i < frames) mean += onset.at(frame+i);
+//		}
+//		mean = (mean / ((meanMultiplier * window) + window + 1)) + threshold;
+//		if (onset.at(frame) < mean) success = false;
+//
+//		if (success)
+//		{
+//			f_peak.timestamp = Vamp::RealTime::frame2RealTime(frame*m_stepSize,m_sampleRate);
+//			output[2].push_back(f_peak);
+//		}
+//	}
+
+	// find moving average of onset
+	vector<float> onsetAverage;
+	Feature f_avg;
+	f_avg.hasTimestamp = true;
+	float avgWindowLength = (average_window*2)+1;
+	for (int frame=0; frame<frames; frame++)
+	{
+		f_avg.timestamp = Vamp::RealTime::frame2RealTime(frame*m_stepSize,m_sampleRate);
+		f_avg.values.clear();
+
+		float result = 0;
+		for (int i=average_window*-1; i<average_window+1; i++)
+		{
+			if (frame+i >= 0 && frame+i < frames)
+				result += abs(onset.at(frame+i));
+		}
+
+		// add threshold value and push result
+		onsetAverage.push_back(result/avgWindowLength + threshold);
+		f_avg.values.push_back(result/avgWindowLength + threshold);
+		output[1].push_back(f_avg);
+	}
+
+	// find peak picking curve by removing moving average from onset curve
+	vector<float> onsetPeak;
+	Feature f_diff;
+	f_diff.hasTimestamp = true;
+	for (int frame=0; frame<frames; frame++)
+	{
+		f_diff.timestamp = Vamp::RealTime::frame2RealTime(frame*m_stepSize,m_sampleRate);
+		f_diff.values.clear();
+
+		// calculate result and apply half-wave rectification
+		float result = onset.at(frame)-onsetAverage.at(frame);
+		if (result < 0) result = 0;
+
+		// push result out
+		onsetPeak.push_back(result);
+		f_diff.values.push_back(result);
+		output[2].push_back(f_diff);
+	}
+
+	// choose peaks
+	Feature f_peak;
+	f_peak.hasTimestamp = true;
+	for (int frame=0; frame<frames; frame++)
+	{
+		bool success = true;
+
+		// ignore 0 values
+		if (onsetPeak.at(frame) <= 0) continue;
+
+		// if any frames within windowSize have a bigger value, this is not the peak
+		for (int i=peak_window*-1; i<peak_window+1; i++)
+		{
+			if (frame+i >= 0 && frame+i < frames)
+			{
+				if (onsetPeak.at(frame+i) > onsetPeak.at(frame)) success = false;
+			}
+		}
+
+		// push result out
+		if (success)
+		{
+			f_peak.timestamp = Vamp::RealTime::frame2RealTime(frame*m_stepSize,m_sampleRate);
+			output[3].push_back(f_peak);
+		}
+	}
+
+	// autocorrelation
+	vector<float> autocor;
+	Feature f_autoCor;
+	f_autoCor.hasTimestamp = true;
+	for (float shift=1; shift < autocor_max*m_sampleRate/m_stepSize; shift++)
+	{
+		float result = 0;
+		f_autoCor.timestamp = Vamp::RealTime::frame2RealTime(shift*m_stepSize,m_sampleRate);
+		f_autoCor.values.clear();
+		for (int frame=0; frame<frames; frame++)
+		{
+			if (frame+shift < frames) result += onsetPeak.at(frame) * onsetPeak.at(frame+shift) / frames;
+		}
+		autocor.push_back(result);
+		f_autoCor.values.push_back(result);
+		output[4].push_back(f_autoCor);
 	}
 
     return output;

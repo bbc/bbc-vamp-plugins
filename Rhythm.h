@@ -74,6 +74,10 @@ protected:
     float cannyShape;
     float *cannyWindow;
     vector< vector<float> > intensity;
+    float threshold;
+    int average_window;
+    int peak_window;
+    float autocor_max;
 };
 
 
