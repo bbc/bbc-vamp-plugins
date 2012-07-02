@@ -24,7 +24,8 @@ Rhythm::Rhythm(float inputSampleRate):Plugin(inputSampleRate)
 	threshold = 1;
 	average_window = 200;
 	peak_window = 6;
-	autocor_max = 5.f;
+	max_bpm = 300;
+	min_bpm = 12;
 }
 
 Rhythm::~Rhythm()
@@ -150,16 +151,29 @@ Rhythm::getParameterDescriptors() const
     peak_windowParam.quantizeStep = 1.0;
     list.push_back(peak_windowParam);
 
-    ParameterDescriptor autocor_maxParam;
-    autocor_maxParam.identifier = "autocor_max";
-    autocor_maxParam.name = "Max autocorrelation period";
-    autocor_maxParam.description = "Maximum period rendered for autocorrelation.";
-    autocor_maxParam.unit = "seconds";
-    autocor_maxParam.minValue = 0.1;
-    autocor_maxParam.maxValue = 60;
-    autocor_maxParam.defaultValue = 5;
-    autocor_maxParam.isQuantized = false;
-    list.push_back(autocor_maxParam);
+    ParameterDescriptor min_bpmParam;
+    min_bpmParam.identifier = "min_bpm";
+    min_bpmParam.name = "Minimum calculated BPM";
+    min_bpmParam.description = "Minimum BPM calculated for autocorrelation.";
+    min_bpmParam.unit = "bpm";
+    min_bpmParam.minValue = 5;
+    min_bpmParam.maxValue = 300;
+    min_bpmParam.defaultValue = 12;
+    min_bpmParam.isQuantized = true;
+    min_bpmParam.quantizeStep = 1.0;
+    list.push_back(min_bpmParam);
+
+    ParameterDescriptor max_bpmParam;
+    max_bpmParam.identifier = "max_bpm";
+    max_bpmParam.name = "Maximum calculated BPM";
+    max_bpmParam.description = "Maximum BPM calculated for autocorrelation.";
+    max_bpmParam.unit = "bpm";
+    max_bpmParam.minValue = 50;
+    max_bpmParam.maxValue = 400;
+    max_bpmParam.defaultValue = 300;
+    max_bpmParam.isQuantized = true;
+    max_bpmParam.quantizeStep = 1.0;
+    list.push_back(max_bpmParam);
 
     return list;
 }
@@ -175,8 +189,10 @@ Rhythm::getParameter(string identifier) const
         return average_window;
     else if (identifier == "peak_window")
         return peak_window;
-    else if (identifier == "autocor_max")
-        return autocor_max;
+    else if (identifier == "min_bpm")
+        return min_bpm;
+    else if (identifier == "max_bpm")
+        return max_bpm;
     return 0;
 }
 
@@ -199,9 +215,13 @@ Rhythm::setParameter(string identifier, float value)
     {
         peak_window = (int)value;
     }
-    else if (identifier == "autocor_max")
+    else if (identifier == "min_bpm")
     {
-        autocor_max = value;
+        min_bpm = (int)value;
+    }
+    else if (identifier == "max_bpm")
+    {
+        max_bpm = (int)value;
     }
 }
 
@@ -229,18 +249,18 @@ Rhythm::getOutputDescriptors() const
 {
     OutputList list;
 
-    OutputDescriptor onset;
-    onset.identifier = "onset";
-    onset.name = "Onset curve";
-    onset.description = "Onset detection curve.";
-    onset.unit = "";
-    onset.hasFixedBinCount = true;
-    onset.binCount = 1;
-    onset.hasKnownExtents = false;
-    onset.isQuantized = false;
-    onset.sampleType = OutputDescriptor::VariableSampleRate;
-    onset.hasDuration = false;
-    list.push_back(onset);
+    OutputDescriptor onset_curve;
+    onset_curve.identifier = "onset_curve";
+    onset_curve.name = "Onset curve";
+    onset_curve.description = "Onset detection curve.";
+    onset_curve.unit = "";
+    onset_curve.hasFixedBinCount = true;
+    onset_curve.binCount = 1;
+    onset_curve.hasKnownExtents = false;
+    onset_curve.isQuantized = false;
+    onset_curve.sampleType = OutputDescriptor::VariableSampleRate;
+    onset_curve.hasDuration = false;
+    list.push_back(onset_curve);
 
     OutputDescriptor average;
     average.identifier = "average";
@@ -268,15 +288,41 @@ Rhythm::getOutputDescriptors() const
     diff.hasDuration = false;
     list.push_back(diff);
 
-    OutputDescriptor peak;
-    peak.identifier = "peak";
-    peak.name = "Onset event";
-    peak.description = "Peak of onset curve.";
-    peak.unit = "";
-    peak.hasFixedBinCount = true;
-    peak.binCount = 0;
-    peak.sampleType = OutputDescriptor::VariableSampleRate;
-    list.push_back(peak);
+    OutputDescriptor onset;
+    onset.identifier = "onset";
+    onset.name = "Onset";
+    onset.description = "Point of onsets.";
+    onset.unit = "";
+    onset.hasFixedBinCount = true;
+    onset.binCount = 0;
+    onset.sampleType = OutputDescriptor::VariableSampleRate;
+    list.push_back(onset);
+
+    OutputDescriptor avg_onset_freq;
+    avg_onset_freq.identifier = "avg-onset-freq";
+    avg_onset_freq.name = "Average Onset Frequency";
+    avg_onset_freq.description = "Rate of onsets per minute.";
+    avg_onset_freq.unit = "";
+    avg_onset_freq.hasFixedBinCount = true;
+    avg_onset_freq.binCount = 1;
+    avg_onset_freq.sampleType = OutputDescriptor::VariableSampleRate;
+    avg_onset_freq.hasKnownExtents = false;
+    avg_onset_freq.isQuantized = false;
+    avg_onset_freq.hasDuration = false;
+    list.push_back(avg_onset_freq);
+
+    OutputDescriptor rhythm_strength;
+    rhythm_strength.identifier = "rhythm-strength";
+    rhythm_strength.name = "Rhythm Strength";
+    rhythm_strength.description = "Average value of peaks in onset curve.";
+    rhythm_strength.unit = "";
+    rhythm_strength.hasFixedBinCount = true;
+    rhythm_strength.binCount = 1;
+    rhythm_strength.sampleType = OutputDescriptor::VariableSampleRate;
+    rhythm_strength.hasKnownExtents = false;
+    rhythm_strength.isQuantized = false;
+    rhythm_strength.hasDuration = false;
+    list.push_back(rhythm_strength);
 
     OutputDescriptor autocor;
     autocor.identifier = "autocor";
@@ -290,6 +336,32 @@ Rhythm::getOutputDescriptors() const
     autocor.sampleType = OutputDescriptor::VariableSampleRate;
     autocor.hasDuration = false;
     list.push_back(autocor);
+
+    OutputDescriptor mean_correlation_peak;
+    mean_correlation_peak.identifier = "mean-correlation-peak";
+    mean_correlation_peak.name = "Mean Correlation Peak";
+    mean_correlation_peak.description = "Mean of the peak autocorrelation values.";
+    mean_correlation_peak.unit = "";
+    mean_correlation_peak.hasFixedBinCount = true;
+    mean_correlation_peak.binCount = 1;
+    mean_correlation_peak.hasKnownExtents = false;
+    mean_correlation_peak.isQuantized = false;
+    mean_correlation_peak.sampleType = OutputDescriptor::VariableSampleRate;
+    mean_correlation_peak.hasDuration = false;
+    list.push_back(mean_correlation_peak);
+
+    OutputDescriptor peak_valley_ratio;
+    peak_valley_ratio.identifier = "peak-valley-ratio";
+    peak_valley_ratio.name = "Peak-Valley Ratio";
+    peak_valley_ratio.description = "Ratio of the mean correlation peak to the mean correlation valley.";
+    peak_valley_ratio.unit = "";
+    peak_valley_ratio.hasFixedBinCount = true;
+    peak_valley_ratio.binCount = 1;
+    peak_valley_ratio.hasKnownExtents = false;
+    peak_valley_ratio.isQuantized = false;
+    peak_valley_ratio.sampleType = OutputDescriptor::VariableSampleRate;
+    peak_valley_ratio.hasDuration = false;
+    list.push_back(peak_valley_ratio);
 
     return list;
 }
@@ -435,6 +507,7 @@ Rhythm::getRemainingFeatures()
 
 	// normalise and export onset curve
 	Feature f_onset;
+	vector<float> onsetNorm;
 	f_onset.hasTimestamp = true;
 	f_onset.hasDuration = false;
 	for (int frame=0; frame<frames; frame++)
@@ -444,13 +517,13 @@ Rhythm::getRemainingFeatures()
 		f_onset.values.clear();
 
 		// normalise value
-		onset.at(frame) = (onset.at(frame) - onsetMean) / onsetStdDev;
+		onsetNorm.push_back((onset.at(frame) - onsetMean) / onsetStdDev);
 
 		// half-wave rectification
-		if (onset.at(frame) < 0) onset.at(frame) = 0;
+		if (onsetNorm.at(frame) < 0) onsetNorm.at(frame) = 0;
 
 		// push result out
-		f_onset.values.push_back(onset.at(frame));
+		f_onset.values.push_back(onsetNorm.at(frame));
 		output[0].push_back(f_onset);
 	}
 
@@ -513,7 +586,7 @@ Rhythm::getRemainingFeatures()
 		for (int i=average_window*-1; i<average_window+1; i++)
 		{
 			if (frame+i >= 0 && frame+i < frames)
-				result += abs(onset.at(frame+i));
+				result += abs(onsetNorm.at(frame+i));
 		}
 
 		// add threshold value and push result
@@ -532,7 +605,7 @@ Rhythm::getRemainingFeatures()
 		f_diff.values.clear();
 
 		// calculate result and apply half-wave rectification
-		float result = onset.at(frame)-onsetAverage.at(frame);
+		float result = onsetNorm.at(frame)-onsetAverage.at(frame);
 		if (result < 0) result = 0;
 
 		// push result out
@@ -543,7 +616,9 @@ Rhythm::getRemainingFeatures()
 
 	// choose peaks
 	Feature f_peak;
+	vector<int> peaks;
 	f_peak.hasTimestamp = true;
+	int onsetCount = 0;
 	for (int frame=0; frame<frames; frame++)
 	{
 		bool success = true;
@@ -564,27 +639,122 @@ Rhythm::getRemainingFeatures()
 		if (success)
 		{
 			f_peak.timestamp = Vamp::RealTime::frame2RealTime(frame*m_stepSize,m_sampleRate);
+			peaks.push_back(frame);
 			output[3].push_back(f_peak);
+			onsetCount++;
 		}
 	}
+
+	// calculate average onset frequency
+	Feature f_avgOnsetFreq;
+	f_avgOnsetFreq.hasTimestamp = true;
+	f_avgOnsetFreq.timestamp = Vamp::RealTime::fromSeconds(0.0);
+	f_avgOnsetFreq.values.push_back((float)onsetCount / (float)(frames*m_stepSize/m_sampleRate));
+	output[4].push_back(f_avgOnsetFreq);
+
+	// calculate rhythm strength
+	Feature f_rhythmStrength;
+	f_rhythmStrength.hasTimestamp = true;
+	f_rhythmStrength.timestamp = Vamp::RealTime::fromSeconds(0.0);
+	float total = 0;
+	for (unsigned i=0; i<peaks.size(); i++)
+	{
+		total += onset.at(peaks.at(i));
+	}
+	f_rhythmStrength.values.push_back(total/(float)peaks.size());
+	output[5].push_back(f_rhythmStrength);
+
+	// find shift range for autocor
+	float firstShift = (int)round(60.f/max_bpm*m_sampleRate/m_stepSize);
+	float lastShift = (int)round(60.f/min_bpm*m_sampleRate/m_stepSize);
 
 	// autocorrelation
 	vector<float> autocor;
 	Feature f_autoCor;
 	f_autoCor.hasTimestamp = true;
-	for (float shift=1; shift < autocor_max*m_sampleRate/m_stepSize; shift++)
+	for (float shift = firstShift; shift < lastShift; shift++)
 	{
 		float result = 0;
 		f_autoCor.timestamp = Vamp::RealTime::frame2RealTime(shift*m_stepSize,m_sampleRate);
 		f_autoCor.values.clear();
 		for (int frame=0; frame<frames; frame++)
 		{
-			if (frame+shift < frames) result += onsetPeak.at(frame) * onsetPeak.at(frame+shift) / frames;
+			if (frame+shift < frames) result += onsetPeak.at(frame) * onsetPeak.at(frame+shift);
 		}
-		autocor.push_back(result);
-		f_autoCor.values.push_back(result);
-		output[4].push_back(f_autoCor);
+		autocor.push_back(result/frames);
+		f_autoCor.values.push_back(result/frames);
+		output[6].push_back(f_autoCor);
 	}
+
+	// find peaks in autocor
+	float percentile = 95;
+	int autocorValleyPos = 0;
+	int autocorWindowLength = 3;
+	vector<float> autocorSorted (autocor);
+	vector<int> autocorPeaks;
+	vector<int> autocorValleys;
+	std::sort (autocorSorted.begin(), autocorSorted.end());
+	float autocorThreshold = autocorSorted.at(percentile / 100.f * (autocorSorted.size() - 1));
+	float autocorValleyValue = autocorThreshold;
+	std::cout << "Threshold is: " << autocorThreshold << "\n";
+	for (unsigned i=0; i<autocor.size(); i++)
+	{
+		bool success = true;
+
+		// check for valley
+		if (autocor.at(i) < autocorValleyValue)
+		{
+			autocorValleyPos = i;
+			autocorValleyValue = autocor.at(i);
+		}
+
+		// if below the threshold, move onto next element
+		if (autocor.at(i) < autocorThreshold) continue;
+
+		// check for other peaks in the area
+		for (int j=autocorWindowLength*-1; j<autocorWindowLength+1; j++)
+		{
+			if (i+j >= 0 && i+j < autocor.size())
+			{
+				if (autocor.at(i+j) > autocor.at(i)) success = false;
+			}
+		}
+
+		// save peak and valley
+		if (success)
+		{
+			autocorPeaks.push_back(firstShift + i);
+			autocorValleys.push_back(firstShift + autocorValleyPos);
+			autocorValleyValue = autocor.at(i);
+		}
+	}
+
+	// find average corrolation peak
+	total = 0;
+	for (unsigned i=0; i<autocorPeaks.size(); i++)
+	{
+		total += autocor.at(autocorPeaks.at(i)-firstShift);
+		std::cout << "Peak at " << autocorPeaks.at(i) << ": " << autocor.at(autocorPeaks.at(i)-firstShift) << "\n";
+	}
+	float meanCorrelationPeak = total / autocorPeaks.size();
+	Feature f_meanCorrelationPeak;
+	f_meanCorrelationPeak.hasTimestamp = true;
+	f_meanCorrelationPeak.timestamp = Vamp::RealTime::fromSeconds(0.0);
+	f_meanCorrelationPeak.values.push_back(meanCorrelationPeak);
+	output[7].push_back(f_meanCorrelationPeak);
+
+	// find peak/valley ratio
+	total = 0;
+	for (unsigned i=0; i<autocorValleys.size(); i++)
+	{
+		total += autocor.at(autocorValleys.at(i)-firstShift);
+		std::cout << "Valley at " << autocorValleys.at(i) << ": " << autocor.at(autocorValleys.at(i)-firstShift) << "\n";
+	}
+	Feature f_peakValleyRatio;
+	f_peakValleyRatio.hasTimestamp = true;
+	f_peakValleyRatio.timestamp = Vamp::RealTime::fromSeconds(0.0);
+	f_peakValleyRatio.values.push_back(meanCorrelationPeak / (total / autocorValleys.size() + 0.0001));
+	output[8].push_back(f_peakValleyRatio);
 
     return output;
 }

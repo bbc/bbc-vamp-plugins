@@ -14,6 +14,7 @@
 #include <cmath>
 #include <complex>
 #include <vector>
+#include <algorithm>
 #include <vamp-sdk/Plugin.h>
 
 using std::string;
@@ -77,7 +78,8 @@ protected:
     float threshold;
     int average_window;
     int peak_window;
-    float autocor_max;
+	int max_bpm;
+	int min_bpm;
 };
 
 
