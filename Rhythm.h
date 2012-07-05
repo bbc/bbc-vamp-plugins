@@ -58,6 +58,7 @@ public:
     void calculateBandFreqs();
     float halfHanning(float n);
     float canny(float n);
+    float peakRegularity(vector<int> peaks, int thisPeak);
 
     FeatureSet process(const float *const *inputBuffers,
                        Vamp::RealTime timestamp);

@@ -363,6 +363,19 @@ Rhythm::getOutputDescriptors() const
     peak_valley_ratio.hasDuration = false;
     list.push_back(peak_valley_ratio);
 
+    OutputDescriptor tempo;
+    tempo.identifier = "tempo";
+    tempo.name = "Tempo";
+    tempo.description = "Overall tempo of the track in BPM.";
+    tempo.unit = "bpm";
+    tempo.hasFixedBinCount = true;
+    tempo.binCount = 1;
+    tempo.hasKnownExtents = false;
+    tempo.isQuantized = false;
+    tempo.sampleType = OutputDescriptor::VariableSampleRate;
+    tempo.hasDuration = false;
+    list.push_back(tempo);
+
     return list;
 }
 
@@ -408,6 +421,18 @@ float
 Rhythm::canny(float n)
 {
 	return n / (cannyShape*cannyShape) * exp(-1 * (n*n) / (2*cannyShape*cannyShape));
+}
+
+float
+Rhythm::peakRegularity(vector<int> peaks, int thisPeak)
+{
+	float total = 0;
+	for (unsigned i=0; i<peaks.size(); i++)
+	{
+		float ratio = (float)peaks.at(i) / (float)thisPeak;
+		total += ratio - round(ratio);
+	}
+	return total;
 }
 
 Rhythm::FeatureSet
@@ -696,7 +721,7 @@ Rhythm::getRemainingFeatures()
 	std::sort (autocorSorted.begin(), autocorSorted.end());
 	float autocorThreshold = autocorSorted.at(percentile / 100.f * (autocorSorted.size() - 1));
 	float autocorValleyValue = autocorThreshold;
-	std::cout << "Threshold is: " << autocorThreshold << "\n";
+//	std::cout << "Threshold is: " << autocorThreshold << "\n";
 	for (unsigned i=0; i<autocor.size(); i++)
 	{
 		bool success = true;
@@ -734,7 +759,7 @@ Rhythm::getRemainingFeatures()
 	for (unsigned i=0; i<autocorPeaks.size(); i++)
 	{
 		total += autocor.at(autocorPeaks.at(i)-firstShift);
-		std::cout << "Peak at " << autocorPeaks.at(i) << ": " << autocor.at(autocorPeaks.at(i)-firstShift) << "\n";
+//		std::cout << "Peak at " << autocorPeaks.at(i) << ": " << autocor.at(autocorPeaks.at(i)-firstShift) << "\n";
 	}
 	float meanCorrelationPeak = total / autocorPeaks.size();
 	Feature f_meanCorrelationPeak;
@@ -748,13 +773,32 @@ Rhythm::getRemainingFeatures()
 	for (unsigned i=0; i<autocorValleys.size(); i++)
 	{
 		total += autocor.at(autocorValleys.at(i)-firstShift);
-		std::cout << "Valley at " << autocorValleys.at(i) << ": " << autocor.at(autocorValleys.at(i)-firstShift) << "\n";
+//		std::cout << "Valley at " << autocorValleys.at(i) << ": " << autocor.at(autocorValleys.at(i)-firstShift) << "\n";
 	}
 	Feature f_peakValleyRatio;
 	f_peakValleyRatio.hasTimestamp = true;
 	f_peakValleyRatio.timestamp = Vamp::RealTime::fromSeconds(0.0);
 	f_peakValleyRatio.values.push_back(meanCorrelationPeak / (total / autocorValleys.size() + 0.0001));
 	output[8].push_back(f_peakValleyRatio);
+
+	// find largest divisor
+	float min = peakRegularity(autocorPeaks, autocorPeaks.at(0));
+	int minPos = 0;
+	for (unsigned i=1; i<autocorPeaks.size(); i++)
+	{
+		float result = peakRegularity(autocorPeaks, autocorPeaks.at(i));
+		if (result < min)
+		{
+			min = result;
+			minPos = i;
+		}
+	}
+	float bpm = 60.f/(autocorPeaks.at(minPos)*m_stepSize/m_sampleRate);
+	Feature f_tempo;
+	f_tempo.hasTimestamp = true;
+	f_tempo.timestamp = Vamp::RealTime::fromSeconds(0.0);
+	f_tempo.values.push_back(bpm);
+	output[9].push_back(f_tempo);
 
     return output;
 }
