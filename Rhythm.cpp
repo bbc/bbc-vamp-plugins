@@ -424,7 +424,8 @@ Rhythm::canny(float n)
 }
 
 float
-Rhythm::peakRegularity(vector<int> peaks, int thisPeak)
+Rhythm::findRemainder(vector<int> peaks,
+		                 int thisPeak)
 {
 	float total = 0;
 	for (unsigned i=0; i<peaks.size(); i++)
@@ -433,6 +434,224 @@ Rhythm::peakRegularity(vector<int> peaks, int thisPeak)
 		total += ratio - round(ratio);
 	}
 	return total;
+}
+
+float
+Rhythm::findTempo(vector<int> peaks)
+{
+	float min = findRemainder(peaks, peaks.at(0));
+	int minPos = 0;
+	for (unsigned i=1; i<peaks.size(); i++)
+	{
+		float result = findRemainder(peaks, peaks.at(i));
+		if (result < min)
+		{
+			min = result;
+			minPos = i;
+		}
+	}
+	return 60.f / (peaks.at(minPos) * m_stepSize / m_sampleRate);
+}
+
+float
+Rhythm::findMeanPeak(vector<float> signal,
+		                vector<int> peaks,
+		                int shift)
+{
+	float total = 0;
+	for (unsigned i=0; i<peaks.size(); i++)
+		total += signal.at(peaks.at(i)-shift);
+	return total / peaks.size();
+}
+
+void
+Rhythm::findCorrelationPeaks(vector<float> autocor_in,
+                                 float percentile_in,
+                                 int windowLength_in,
+                                 int shift_in,
+                                 vector<int>& peaks_out,
+                                 vector<int>& valleys_out)
+{
+	vector<float> autocorSorted (autocor_in);
+	std::sort (autocorSorted.begin(), autocorSorted.end());
+	float autocorThreshold = autocorSorted.at(percentile_in / 100.f * (autocorSorted.size() - 1));
+
+	int autocorValleyPos = 0;
+	float autocorValleyValue = autocorThreshold;
+
+	for (unsigned i=0; i<autocor_in.size(); i++)
+	{
+		bool success = true;
+
+		// check for valley
+		if (autocor_in.at(i) < autocorValleyValue)
+		{
+			autocorValleyPos = i;
+			autocorValleyValue = autocor_in.at(i);
+		}
+
+		// if below the threshold, move onto next element
+		if (autocor_in.at(i) < autocorThreshold) continue;
+
+		// check for other peaks in the area
+		for (int j=windowLength_in*-1; j<windowLength_in+1; j++)
+		{
+			if (i+j >= 0 && i+j < autocor_in.size())
+			{
+				if (autocor_in.at(i+j) > autocor_in.at(i)) success = false;
+			}
+		}
+
+		// save peak and valley
+		if (success)
+		{
+			peaks_out.push_back(shift_in + i);
+			valleys_out.push_back(shift_in + autocorValleyPos);
+			autocorValleyValue = autocor_in.at(i);
+		}
+	}
+}
+
+void
+Rhythm::autocorrelation(vector<float> signal_in,
+		                   int startShift_in,
+		                   int endShift_in,
+		                   vector<float>& autocor_out)
+{
+	for (float shift = startShift_in; shift < endShift_in; shift++)
+	{
+		float result = 0;
+		for (unsigned frame=0; frame<signal_in.size(); frame++)
+		{
+			if (frame+shift < signal_in.size()) result += signal_in.at(frame) * signal_in.at(frame+shift);
+		}
+		autocor_out.push_back(result/signal_in.size());
+	}
+}
+
+void
+Rhythm::findOnsetPeaks(vector<float> onset_in,
+		                  int windowLength_in,
+		                  vector<int>& peaks_out)
+{
+	for (unsigned frame=0; frame<onset_in.size(); frame++)
+	{
+		bool success = true;
+
+		// ignore 0 values
+		if (onset_in.at(frame) <= 0) continue;
+
+		// if any frames within windowSize have a bigger value, this is not the peak
+		for (int i=windowLength_in*-1; i<windowLength_in+1; i++)
+		{
+			if (frame+i >= 0 && frame+i < onset_in.size())
+			{
+				if (onset_in.at(frame+i) > onset_in.at(frame)) success = false;
+			}
+		}
+
+		// push result out
+		if (success)
+		{
+			peaks_out.push_back(frame);
+		}
+	}
+}
+
+void
+Rhythm::movingAverage(vector<float> signal_in,
+		                 int windowLength_in,
+		                 float threshold_in,
+		                 vector<float>& average_out,
+		                 vector<float>& difference_out)
+{
+	float avgWindowLength = (windowLength_in*2)+1;
+	for (unsigned frame=0; frame<signal_in.size(); frame++)
+	{
+		float result = 0;
+		for (int i=windowLength_in*-1; i<windowLength_in+1; i++)
+		{
+			if (frame+i >= 0 && frame+i < signal_in.size())
+				result += abs(signal_in.at(frame+i));
+		}
+
+		// calculate average and difference results
+		float average = result/avgWindowLength + threshold_in;
+		float difference = signal_in.at(frame) - average;
+		if (difference < 0) difference = 0;
+
+		average_out.push_back(average);
+		difference_out.push_back(difference);
+	}
+}
+
+void
+Rhythm::normalise(vector<float> signal_in,
+                    vector<float>& normalised_out)
+{
+	// find mean
+	float total = 0;
+	for (unsigned i=0; i<signal_in.size(); i++)
+		total += signal_in.at(i);
+	float mean = total / signal_in.size();
+
+	// find std dev
+	float std = 0;
+	for (unsigned i=0; i<signal_in.size(); i++)
+		std += pow(signal_in.at(i) - mean, 2);
+	std = sqrt(std / signal_in.size());
+
+	// normalise and rectify
+	for (unsigned i=0; i<signal_in.size(); i++)
+	{
+		normalised_out.push_back((signal_in.at(i) - mean) / std);
+		if (normalised_out.at(i) < 0) normalised_out.at(i) = 0;
+	}
+}
+
+
+void
+Rhythm::halfHannConvolve(vector< vector<float> >& envelope_out)
+{
+	for (unsigned frame=0; frame<intensity.size(); frame++)
+	{
+		vector<float> frameResult;
+		for (int subBand=0; subBand<numBands; subBand++)
+		{
+			float result = 0;
+			for (int shift=0; shift<halfHannLength; shift++)
+			{
+				if (frame+shift < intensity.size()) result += intensity.at(frame+shift).at(subBand) * halfHannWindow[shift];
+			}
+			frameResult.push_back(result);
+		}
+		envelope_out.push_back(frameResult);
+	}
+}
+
+void
+Rhythm::cannyConvolve(vector< vector<float> > envelope_in,
+		                 vector<float>& onset_out)
+{
+	for (unsigned frame=0; frame<envelope_in.size(); frame++)
+	{
+		// reset feature details
+		float sum = 0;
+
+		// for each sub-band
+		for (int subBand=0; subBand<numBands; subBand++)
+		{
+			// convolve the canny window with the envelope of that sub-band
+			for (int shift=cannyLength*-1; shift<cannyLength; shift++)
+			{
+				if (frame+shift >= 0 && frame+shift < envelope_in.size())
+					sum += envelope_in.at(frame+shift).at(subBand) * cannyWindow[shift+cannyLength];
+			}
+		}
+
+		// save result
+		onset_out.push_back(sum);
+	}
 }
 
 Rhythm::FeatureSet
@@ -482,211 +701,82 @@ Rhythm::getRemainingFeatures()
 
 	// find envelope by convolving each subband with half-hanning window
 	vector< vector<float> > envelope;
-	for (int frame=0; frame<frames; frame++)
-	{
-		vector<float> frameResult;
-		for (int subBand=0; subBand<numBands; subBand++)
-		{
-			float result = 0;
-			for (int shift=0; shift<halfHannLength; shift++)
-			{
-				if (frame+shift < frames) result += intensity.at(frame+shift).at(subBand) * halfHannWindow[shift];
-			}
-			frameResult.push_back(result);
-		}
-		envelope.push_back(frameResult);
-	}
+	halfHannConvolve(envelope);
 
 	// find onset curve by convolving each subband of envelope with canny window
 	vector<float> onset;
-	float onsetMean = 0;
-	for (int frame=0; frame<frames; frame++)
-	{
-		// reset feature details
-		float sum = 0;
+	cannyConvolve(envelope, onset);
 
-		// for each sub-band
-		for (int subBand=0; subBand<numBands; subBand++)
-		{
-			// convolve the canny window with the envelope of that sub-band
-			for (int shift=cannyLength*-1; shift<cannyLength; shift++)
-			{
-				if (frame+shift >= 0 && frame+shift < frames)
-					sum += envelope.at(frame+shift).at(subBand) * cannyWindow[shift+cannyLength];
-			}
-		}
-
-		// save result
-		onset.push_back(sum);
-		onsetMean += sum;
-	}
-	onsetMean = onsetMean / frames;
-
-	// find std dev
-	float onsetStdDev = 0;
-	for (int frame=0; frame<frames; frame++)
-	{
-		onsetStdDev += pow(onset.at(frame) - onsetMean, 2);
-	}
-	onsetStdDev = sqrt(onsetStdDev / frames);
-
-	// normalise and export onset curve
-	Feature f_onset;
+	// normalise onset curve
 	vector<float> onsetNorm;
+	normalise(onset, onsetNorm);
+
+	// push normalised onset curve
+	Feature f_onset;
 	f_onset.hasTimestamp = true;
-	f_onset.hasDuration = false;
-	for (int frame=0; frame<frames; frame++)
+	for (unsigned i=0; i<onsetNorm.size(); i++)
 	{
-		// find timestamp and reset feature
-		f_onset.timestamp = Vamp::RealTime::frame2RealTime(frame*m_stepSize,m_sampleRate);
+		f_onset.timestamp = Vamp::RealTime::frame2RealTime(i*m_stepSize,m_sampleRate);
 		f_onset.values.clear();
-
-		// normalise value
-		onsetNorm.push_back((onset.at(frame) - onsetMean) / onsetStdDev);
-
-		// half-wave rectification
-		if (onsetNorm.at(frame) < 0) onsetNorm.at(frame) = 0;
-
-		// push result out
-		f_onset.values.push_back(onsetNorm.at(frame));
+		f_onset.values.push_back(onsetNorm.at(i));
 		output[0].push_back(f_onset);
 	}
 
-	// SIMPLE THRESHOLD
-//	Feature f_peak;
-//	f_peak.hasTimestamp = true;
-//	for (int frame=0; frame<frames; frame++)
-//	{
-//		if (onset.at(frame) > 1)
-//		{
-//			f_peak.timestamp = Vamp::RealTime::frame2RealTime(frame*m_stepSize,m_sampleRate);
-//			output[2].push_back(f_peak);
-//		}
-//	}
-
-	// DIXON METHOD
-//	int window = 3;
-//	int meanMultiplier = 3;
-////	float threshold = 0.1;
-//	Feature f_peak;
-//	f_peak.hasTimestamp = true;
-//	for (int frame=0; frame<frames; frame++)
-//	{
-//		bool success = true;
-//
-//		// highest value within window
-//		for (int i=window*-1; i<window+1; i++)
-//		{
-//			if (frame+i >= 0 && frame+i < frames)
-//				if (onset.at(frame+i) > onset.at(frame)) success = false;
-//		}
-//
-//		// higher than mean + threshold within asymmetric window
-//		float mean = 0;
-//		for (int i=meanMultiplier*window*-1; i<window+1; i++)
-//		{
-//			if (frame+i >= 0 && frame+i < frames) mean += onset.at(frame+i);
-//		}
-//		mean = (mean / ((meanMultiplier * window) + window + 1)) + threshold;
-//		if (onset.at(frame) < mean) success = false;
-//
-//		if (success)
-//		{
-//			f_peak.timestamp = Vamp::RealTime::frame2RealTime(frame*m_stepSize,m_sampleRate);
-//			output[2].push_back(f_peak);
-//		}
-//	}
-
-	// find moving average of onset
+	// find moving average of onset curve and difference
 	vector<float> onsetAverage;
+	vector<float> onsetDiff;
+	movingAverage(onsetNorm, average_window, threshold, onsetAverage, onsetDiff);
+
+	// push moving average
 	Feature f_avg;
 	f_avg.hasTimestamp = true;
-	float avgWindowLength = (average_window*2)+1;
-	for (int frame=0; frame<frames; frame++)
+	for (unsigned i=0; i<onsetAverage.size(); i++)
 	{
-		f_avg.timestamp = Vamp::RealTime::frame2RealTime(frame*m_stepSize,m_sampleRate);
+		f_avg.timestamp = Vamp::RealTime::frame2RealTime(i*m_stepSize,m_sampleRate);
 		f_avg.values.clear();
-
-		float result = 0;
-		for (int i=average_window*-1; i<average_window+1; i++)
-		{
-			if (frame+i >= 0 && frame+i < frames)
-				result += abs(onsetNorm.at(frame+i));
-		}
-
-		// add threshold value and push result
-		onsetAverage.push_back(result/avgWindowLength + threshold);
-		f_avg.values.push_back(result/avgWindowLength + threshold);
+		f_avg.values.push_back(onsetAverage.at(i));
 		output[1].push_back(f_avg);
 	}
 
-	// find peak picking curve by removing moving average from onset curve
-	vector<float> onsetPeak;
+	// push difference from average
 	Feature f_diff;
 	f_diff.hasTimestamp = true;
-	for (int frame=0; frame<frames; frame++)
+	for (unsigned i=0; i<onsetDiff.size(); i++)
 	{
-		f_diff.timestamp = Vamp::RealTime::frame2RealTime(frame*m_stepSize,m_sampleRate);
+		f_diff.timestamp = Vamp::RealTime::frame2RealTime(i*m_stepSize,m_sampleRate);
 		f_diff.values.clear();
-
-		// calculate result and apply half-wave rectification
-		float result = onsetNorm.at(frame)-onsetAverage.at(frame);
-		if (result < 0) result = 0;
-
-		// push result out
-		onsetPeak.push_back(result);
-		f_diff.values.push_back(result);
+		f_diff.values.push_back(onsetDiff.at(i));
 		output[2].push_back(f_diff);
 	}
 
 	// choose peaks
-	Feature f_peak;
 	vector<int> peaks;
+	findOnsetPeaks(onsetDiff, peak_window, peaks);
+	int onsetCount = (int)peaks.size();
+
+	// push peaks
+	Feature f_peak;
 	f_peak.hasTimestamp = true;
-	int onsetCount = 0;
-	for (int frame=0; frame<frames; frame++)
+	for (unsigned i=0; i<peaks.size(); i++)
 	{
-		bool success = true;
-
-		// ignore 0 values
-		if (onsetPeak.at(frame) <= 0) continue;
-
-		// if any frames within windowSize have a bigger value, this is not the peak
-		for (int i=peak_window*-1; i<peak_window+1; i++)
-		{
-			if (frame+i >= 0 && frame+i < frames)
-			{
-				if (onsetPeak.at(frame+i) > onsetPeak.at(frame)) success = false;
-			}
-		}
-
-		// push result out
-		if (success)
-		{
-			f_peak.timestamp = Vamp::RealTime::frame2RealTime(frame*m_stepSize,m_sampleRate);
-			peaks.push_back(frame);
-			output[3].push_back(f_peak);
-			onsetCount++;
-		}
+		f_peak.timestamp = Vamp::RealTime::frame2RealTime(peaks.at(i)*m_stepSize, m_sampleRate);
+		output[3].push_back(f_peak);
 	}
 
 	// calculate average onset frequency
+	float averageOnsetFreq = (float)onsetCount / (float)(frames*m_stepSize/m_sampleRate);
 	Feature f_avgOnsetFreq;
 	f_avgOnsetFreq.hasTimestamp = true;
 	f_avgOnsetFreq.timestamp = Vamp::RealTime::fromSeconds(0.0);
-	f_avgOnsetFreq.values.push_back((float)onsetCount / (float)(frames*m_stepSize/m_sampleRate));
+	f_avgOnsetFreq.values.push_back(averageOnsetFreq);
 	output[4].push_back(f_avgOnsetFreq);
 
 	// calculate rhythm strength
+	float rhythmStrength = findMeanPeak(onset, peaks, 0);
 	Feature f_rhythmStrength;
 	f_rhythmStrength.hasTimestamp = true;
 	f_rhythmStrength.timestamp = Vamp::RealTime::fromSeconds(0.0);
-	float total = 0;
-	for (unsigned i=0; i<peaks.size(); i++)
-	{
-		total += onset.at(peaks.at(i));
-	}
-	f_rhythmStrength.values.push_back(total/(float)peaks.size());
+	f_rhythmStrength.values.push_back(rhythmStrength);
 	output[5].push_back(f_rhythmStrength);
 
 	// find shift range for autocor
@@ -695,73 +785,26 @@ Rhythm::getRemainingFeatures()
 
 	// autocorrelation
 	vector<float> autocor;
+	autocorrelation(onsetDiff, firstShift, lastShift, autocor);
 	Feature f_autoCor;
 	f_autoCor.hasTimestamp = true;
 	for (float shift = firstShift; shift < lastShift; shift++)
 	{
-		float result = 0;
 		f_autoCor.timestamp = Vamp::RealTime::frame2RealTime(shift*m_stepSize,m_sampleRate);
 		f_autoCor.values.clear();
-		for (int frame=0; frame<frames; frame++)
-		{
-			if (frame+shift < frames) result += onsetPeak.at(frame) * onsetPeak.at(frame+shift);
-		}
-		autocor.push_back(result/frames);
-		f_autoCor.values.push_back(result/frames);
+		f_autoCor.values.push_back(autocor.at(shift-firstShift));
 		output[6].push_back(f_autoCor);
 	}
 
 	// find peaks in autocor
 	float percentile = 95;
-	int autocorValleyPos = 0;
 	int autocorWindowLength = 3;
-	vector<float> autocorSorted (autocor);
 	vector<int> autocorPeaks;
 	vector<int> autocorValleys;
-	std::sort (autocorSorted.begin(), autocorSorted.end());
-	float autocorThreshold = autocorSorted.at(percentile / 100.f * (autocorSorted.size() - 1));
-	float autocorValleyValue = autocorThreshold;
-//	std::cout << "Threshold is: " << autocorThreshold << "\n";
-	for (unsigned i=0; i<autocor.size(); i++)
-	{
-		bool success = true;
-
-		// check for valley
-		if (autocor.at(i) < autocorValleyValue)
-		{
-			autocorValleyPos = i;
-			autocorValleyValue = autocor.at(i);
-		}
-
-		// if below the threshold, move onto next element
-		if (autocor.at(i) < autocorThreshold) continue;
-
-		// check for other peaks in the area
-		for (int j=autocorWindowLength*-1; j<autocorWindowLength+1; j++)
-		{
-			if (i+j >= 0 && i+j < autocor.size())
-			{
-				if (autocor.at(i+j) > autocor.at(i)) success = false;
-			}
-		}
-
-		// save peak and valley
-		if (success)
-		{
-			autocorPeaks.push_back(firstShift + i);
-			autocorValleys.push_back(firstShift + autocorValleyPos);
-			autocorValleyValue = autocor.at(i);
-		}
-	}
+	findCorrelationPeaks(autocor, percentile, autocorWindowLength, firstShift, autocorPeaks, autocorValleys);
 
 	// find average corrolation peak
-	total = 0;
-	for (unsigned i=0; i<autocorPeaks.size(); i++)
-	{
-		total += autocor.at(autocorPeaks.at(i)-firstShift);
-//		std::cout << "Peak at " << autocorPeaks.at(i) << ": " << autocor.at(autocorPeaks.at(i)-firstShift) << "\n";
-	}
-	float meanCorrelationPeak = total / autocorPeaks.size();
+	float meanCorrelationPeak = findMeanPeak(autocor, autocorPeaks, firstShift);
 	Feature f_meanCorrelationPeak;
 	f_meanCorrelationPeak.hasTimestamp = true;
 	f_meanCorrelationPeak.timestamp = Vamp::RealTime::fromSeconds(0.0);
@@ -769,35 +812,19 @@ Rhythm::getRemainingFeatures()
 	output[7].push_back(f_meanCorrelationPeak);
 
 	// find peak/valley ratio
-	total = 0;
-	for (unsigned i=0; i<autocorValleys.size(); i++)
-	{
-		total += autocor.at(autocorValleys.at(i)-firstShift);
-//		std::cout << "Valley at " << autocorValleys.at(i) << ": " << autocor.at(autocorValleys.at(i)-firstShift) << "\n";
-	}
+	float meanCorrelationValley = findMeanPeak(autocor, autocorValleys, firstShift) + 0.0001;
 	Feature f_peakValleyRatio;
 	f_peakValleyRatio.hasTimestamp = true;
 	f_peakValleyRatio.timestamp = Vamp::RealTime::fromSeconds(0.0);
-	f_peakValleyRatio.values.push_back(meanCorrelationPeak / (total / autocorValleys.size() + 0.0001));
+	f_peakValleyRatio.values.push_back(meanCorrelationPeak / meanCorrelationValley);
 	output[8].push_back(f_peakValleyRatio);
 
-	// find largest divisor
-	float min = peakRegularity(autocorPeaks, autocorPeaks.at(0));
-	int minPos = 0;
-	for (unsigned i=1; i<autocorPeaks.size(); i++)
-	{
-		float result = peakRegularity(autocorPeaks, autocorPeaks.at(i));
-		if (result < min)
-		{
-			min = result;
-			minPos = i;
-		}
-	}
-	float bpm = 60.f/(autocorPeaks.at(minPos)*m_stepSize/m_sampleRate);
+	// find tempo from peaks
+	float tempo = findTempo(autocorPeaks);
 	Feature f_tempo;
 	f_tempo.hasTimestamp = true;
 	f_tempo.timestamp = Vamp::RealTime::fromSeconds(0.0);
-	f_tempo.values.push_back(bpm);
+	f_tempo.values.push_back(tempo);
 	output[9].push_back(f_tempo);
 
     return output;

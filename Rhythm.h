@@ -58,11 +58,36 @@ public:
     void calculateBandFreqs();
     float halfHanning(float n);
     float canny(float n);
-    float peakRegularity(vector<int> peaks, int thisPeak);
-
+    float findRemainder(vector<int> peaks,
+                          int thisPeak);
+    float findTempo(vector<int> peaks);
+    float findMeanPeak(vector<float> signal,
+    		             vector<int> peaks,
+    		             int shift);
+    void findCorrelationPeaks(vector<float> autocor_in,
+    		                     float percentile_in,
+    		                     int windowLength_in,
+    		                     int shift_in,
+    		                     vector<int>& peaks_out,
+    		                     vector<int>& valleys_out);
+    void autocorrelation(vector<float> signal_in,
+    		                int startShift_in,
+    		                int endShift_in,
+    		                vector<float>& autocor_out);
+    void findOnsetPeaks(vector<float> onset_in,
+    		           int windowLength_in,
+    		           vector<int>& peaks_out);
+    void movingAverage(vector<float> signal_in,
+                         int windowLength_in,
+                         float threshold_in,
+                         vector<float>& average_out,
+                         vector<float>& difference_out);
+    void normalise(vector<float> signal_in,
+                     vector<float>& normalised_out);
+    void halfHannConvolve(vector< vector<float> >& envelope_out);
+    void cannyConvolve(vector< vector<float> > envelope_in, vector<float>& onset_out);
     FeatureSet process(const float *const *inputBuffers,
-                       Vamp::RealTime timestamp);
-
+                        Vamp::RealTime timestamp);
     FeatureSet getRemainingFeatures();
 
 protected:
