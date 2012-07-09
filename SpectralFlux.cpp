@@ -1,4 +1,5 @@
 #include "SpectralFlux.h"
+/// @cond
 
 SpectralFlux::SpectralFlux(float inputSampleRate):Plugin(inputSampleRate)
 {
@@ -206,3 +207,4 @@ SpectralFlux::getRemainingFeatures()
     return FeatureSet();
 }
 
+/// @endcond

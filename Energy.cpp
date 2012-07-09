@@ -1,4 +1,5 @@
 #include "Energy.h"
+/// @cond
 
 Energy::Energy(float inputSampleRate):Plugin(inputSampleRate)
 {
@@ -266,3 +267,4 @@ Energy::getRemainingFeatures()
     return output;
 }
 
+/// @endcond

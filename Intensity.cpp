@@ -1,4 +1,5 @@
 #include "Intensity.h"
+/// @cond
 
 Intensity::Intensity(float inputSampleRate):Plugin(inputSampleRate)
 {
@@ -186,18 +187,6 @@ Intensity::reset()
 {
 }
 
-void
-Intensity::calculateBandFreqs()
-{
-	delete [] bandHighFreq;
-	bandHighFreq = new float[numBands];
-
-	for (int k=0; k<numBands; k++)
-	{
-		bandHighFreq[k] = m_sampleRate / pow(2.f,numBands-k);
-	}
-}
-
 Intensity::FeatureSet
 Intensity::process(const float *const *inputBuffers, Vamp::RealTime timestamp)
 {
@@ -269,3 +258,20 @@ Intensity::getRemainingFeatures()
     return output;
 }
 
+/// @endcond
+
+/*!
+ * \brief Calculates the upper frequency for each of a given
+ * number of sub-bands.
+ */
+void
+Intensity::calculateBandFreqs()
+{
+	delete [] bandHighFreq;
+	bandHighFreq = new float[numBands];
+
+	for (int k=0; k<numBands; k++)
+	{
+		bandHighFreq[k] = m_sampleRate / pow(2.f,numBands-k);
+	}
+}
