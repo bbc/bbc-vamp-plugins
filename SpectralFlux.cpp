@@ -4,6 +4,11 @@
 SpectralFlux::SpectralFlux(float inputSampleRate):Plugin(inputSampleRate)
 {
 	l2norm = false;
+	prevBin = new vector<float>;
+	for (int i=0; i<m_blockSize/2; i++)
+	{
+	  prevBin.push_back(0);
+	}
 }
 
 SpectralFlux::~SpectralFlux()
@@ -180,25 +185,33 @@ SpectralFlux::process(const float *const *inputBuffers, Vamp::RealTime timestamp
 	for (int i=0; i<m_blockSize/2; i++)
 	{
 		// get absolute value
-		float binVal = abs(complex<float>(inputBuffers[0][i*2], inputBuffers[0][i*2+1]));
+		float bin = abs(complex<float>(inputBuffers[0][i*2], inputBuffers[0][i*2+1]));
 
-		// add square or abs value to total
-		if (l2norm)
-			total += binVal*binVal;
-		else
-			total += abs(binVal);
+		// find difference from prev frame
+		float diff = bin - prevBin.at(i);
+
+		// save current frame
+		prevBin.at(i) = bin;
+
+		// have-wave rectify
+		if (diff < 0) diff = diff * -1;
+
+		// square if L2 norm
+		if (l2norm) diff = diff*diff;
+
+		// add to total
+		total += diff;
 	}
 
-	// if using L2 norm, find root
-	if (l2norm)
-		total = sqrt(total);
+	// find root of total if L2 norm
+	if (l2norm) total = sqrt(total);
 
 	// send SpectralFlux outputs
 	Feature flux;
 	flux.values.push_back(total);
 	output[0].push_back(flux);
 
-    return output;
+  return output;
 }
 
 SpectralFlux::FeatureSet

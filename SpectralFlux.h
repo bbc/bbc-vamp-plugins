@@ -51,6 +51,7 @@ public:
 protected:
     /// @cond
     int m_blockSize, m_stepSize;
+    vector<float> prevBin;
     /// @endcond
 
     bool l2norm;	//!< Flag to indicate use of L2 normalisation

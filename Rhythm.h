@@ -100,7 +100,7 @@ using std::cos;
  * window of length \f$(2L+1)\f$, where \f$L\f$ is set by the parameter <i>onset
  * peak window length</i>.
  *
- * The <b>average onset frequency</b> is the total number of offsets divided by
+ * The <b>average onset frequency</b> is the total number of onsets divided by
  * the length of the track in minutes.
  *
  * The <b>rhythm strength</b> is the mean value of the peaks of the onset curve
