@@ -4,11 +4,6 @@
 SpectralFlux::SpectralFlux(float inputSampleRate):Plugin(inputSampleRate)
 {
 	l2norm = false;
-	prevBin = new vector<float>;
-	for (int i=0; i<m_blockSize/2; i++)
-	{
-	  prevBin.push_back(0);
-	}
 }
 
 SpectralFlux::~SpectralFlux()
@@ -173,6 +168,7 @@ SpectralFlux::initialise(size_t channels, size_t stepSize, size_t blockSize)
 void
 SpectralFlux::reset()
 {
+  prevBin.clear();
 }
 
 SpectralFlux::FeatureSet
@@ -184,6 +180,12 @@ SpectralFlux::process(const float *const *inputBuffers, Vamp::RealTime timestamp
 	// for each frequency bin
 	for (int i=0; i<m_blockSize/2; i++)
 	{
+	  // make up previous value if none exists
+	  while (i >= prevBin.size())
+	  {
+	    prevBin.push_back(0.f);
+	  }
+
 		// get absolute value
 		float bin = abs(complex<float>(inputBuffers[0][i*2], inputBuffers[0][i*2+1]));
 
