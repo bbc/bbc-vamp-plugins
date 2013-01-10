@@ -1,3 +1,23 @@
+/* Intensity.cpp
+ *
+ * Copyright (c) 2013 British Broadcasting Corporation
+ *
+ * This file is part of the BBC Vamp plugin collection.
+ *
+ * BBC Vamp plugin collection is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * BBC Vamp plugin collection is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the BBC Vamp plugin collection.
+ * If not, see <http://www.gnu.org/licenses/>.
+*/
 #include "Intensity.h"
 /// @cond
 
@@ -11,6 +31,7 @@ Intensity::Intensity(float inputSampleRate):Plugin(inputSampleRate)
 
 Intensity::~Intensity()
 {
+  delete [] bandHighFreq;
 }
 
 string
@@ -46,7 +67,7 @@ Intensity::getPluginVersion() const
 string
 Intensity::getCopyright() const
 {
-    return "(c) 2012 British Broadcasting Corporation";
+    return "(c) 2013 British Broadcasting Corporation";
 }
 
 Intensity::InputDomain
@@ -242,7 +263,7 @@ Intensity::process(const float *const *inputBuffers, Vamp::RealTime timestamp)
 	// clean up
 	delete [] bandTotal;
 
-    return output;
+  return output;
 }
 
 Intensity::FeatureSet
@@ -250,12 +271,7 @@ Intensity::getRemainingFeatures()
 {
 
 	FeatureSet output;
-//	Feature f;
-//	f.hasTimestamp = true;
-//	f.timestamp = Vamp::RealTime::fromSeconds(0);
-//	f.values.push_back(lowEnergyRatio);
-//	output[1].push_back(f);
-    return output;
+  return output;
 }
 
 /// @endcond

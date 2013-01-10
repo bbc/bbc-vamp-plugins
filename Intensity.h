@@ -1,3 +1,23 @@
+/* Intensity.h
+ *
+ * Copyright (c) 2013 British Broadcasting Corporation
+ *
+ * This file is part of the BBC Vamp plugin collection.
+ *
+ * BBC Vamp plugin collection is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * BBC Vamp plugin collection is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the BBC Vamp plugin collection.
+ * If not, see <http://www.gnu.org/licenses/>.
+*/
 #ifndef _INTENSITY_H_
 #define _INTENSITY_H_
 
@@ -16,7 +36,7 @@ using std::complex;
  *
  * \section Outputs
  * \par Intensity
- * The sum of the absolute value of the FFT bins.
+ * The sum of the magnitude of the FFT bins.
  * \par Intensity ratio
  * The ratio between the intensity of each sub-band to the overall intensity.
  *
@@ -28,11 +48,11 @@ using std::complex;
  *
  * The intensity features are based on those published in [1], section 3A.
  *
- * Firstly the signal is divided into \f$n\f$ sub-bands with the following frequency ranges.
- * \f[ \left(0,\frac{F_s}{2^n}\right) , \left(\frac{F_s}{2^n},\frac{F_s}{2^{n-1}}\right)
+ * Firstly the signal is divided into \f$i\f$ sub-bands with the following frequency ranges.
+ * \f[ \left(0,\frac{F_s}{2^i}\right) , \left(\frac{F_s}{2^i},\frac{F_s}{2^{i-1}}\right)
  * , \ldots \left(\frac{F_s}{2^2},\frac{F_s}{2^1}\right) \f]
  *
- * The intensity of each frame \f$n\f$ is calculated by summing the absolute value \f$A\f$ of each
+ * The intensity of each frame \f$n\f$ is calculated by summing the magnitude \f$A\f$ of each
  * frequency bin \f$k\f$.
  * \f[ I(n) = \displaystyle\sum\limits_{k=0}^{F_s/2} A(n,k) \f]
  *

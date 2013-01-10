@@ -1,3 +1,23 @@
+/* Rhythm.h
+ *
+ * Copyright (c) 2013 British Broadcasting Corporation
+ *
+ * This file is part of the BBC Vamp plugin collection.
+ *
+ * BBC Vamp plugin collection is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * BBC Vamp plugin collection is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the BBC Vamp plugin collection.
+ * If not, see <http://www.gnu.org/licenses/>.
+*/
 #ifndef VAMPBBCRD_RHYTHM_H_
 #define VAMPBBCRD_RHYTHM_H_
 
@@ -72,7 +92,7 @@ using std::cos;
  * \frac{F_s}{2^{n-1}}\right) , \ldots \left(\frac{F_s}{2^2},
  * \frac{F_s}{2^1}\right) \f]
  *
- * For each sub-band, the absolute value of the FFT bins are summed, producing
+ * For each sub-band, the magnitude of the FFT bins are summed, producing
  * \f$n\f$ signals. Each of the signals are convolved with a half-hanning
  * window, where \f$L\f$ is set as 12.
  * \f[ H(w) = 0.5 + 0.5\cos\left(2\pi \cdot \frac{w}{2L-1} \right) \hspace{20px}

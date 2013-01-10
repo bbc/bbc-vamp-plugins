@@ -1,3 +1,23 @@
+/* Energy.h
+ *
+ * Copyright (c) 2013 British Broadcasting Corporation
+ *
+ * This file is part of the BBC Vamp plugin collection.
+ *
+ * BBC Vamp plugin collection is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * BBC Vamp plugin collection is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the BBC Vamp plugin collection.
+ * If not, see <http://www.gnu.org/licenses/>.
+*/
 #ifndef _ENERGY_H_
 #define _ENERGY_H_
 
@@ -10,6 +30,20 @@ using std::vector;
 
 /*!
  * \brief Calculates the RMS energy and low energy ratio of a signal
+ *
+ * \section Outputs
+ * \par RMS energy
+ * The root mean square energy of the signal.
+ * \par Low energy ratio
+ * Percentage of blocks/frames whose energy falls below a threshold.
+ *
+ * \section Parameters
+ * \par Low energy threshold
+ * Ratio of threshold to the RMS energy (default = 1.0)
+ * \par Use root
+ * Whether to apply the square root in RMS calculation. (default = 1)
+ *
+ * \section Description
  *
  * <b>RMS energy</b> for each block is calculated as follows. The square root
  * can be removed using the 'Use root' parameter (default = true)

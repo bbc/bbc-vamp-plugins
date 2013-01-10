@@ -15,6 +15,11 @@
 ##  VampExamplePlugins project found in the build directory of the SDK.)
 
 
+# Edit this to the location of the Vamp plugin SDK, relative to your
+# project directory
+#
+VAMP_SDK_DIR := /home/chrisbau/builds/vamp-plugin-sdk-v2.2.1
+
 # Edit this to the base name of your plugin library
 #
 PLUGIN_LIBRARY_NAME := bbcrd-vamp-plugins
@@ -26,12 +31,6 @@ PLUGIN_SOURCES := Energy.cpp Intensity.cpp SpectralFlux.cpp Rhythm.cpp SpectralC
 # Edit this to list the .h files in your plugin project
 #
 PLUGIN_HEADERS := Energy.h Intensity.h SpectralFlux.h Rhythm.h SpectralContrast.h 
-
-# Edit this to the location of the Vamp plugin SDK, relative to your
-# project directory
-#
-VAMP_SDK_DIR := /home/chrisbau/builds/vamp-plugin-sdk-v2.2.1
-
 
 ## Uncomment these for an OS/X universal binary (PPC and 32- and
 ## 64-bit Intel) supporting 10.4 or newer (if you have the 10.4 SDK):
