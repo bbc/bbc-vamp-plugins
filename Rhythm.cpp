@@ -1,23 +1,20 @@
-/* Rhythm.cpp
+/**
+ * BBC Vamp plugin collection
  *
- * Copyright (c) 2013 British Broadcasting Corporation
+ * Copyright (c) 2011-2013 British Broadcasting Corporation
  *
- * This file is part of the BBC Vamp plugin collection.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * BBC Vamp plugin collection is free software: you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * BBC Vamp plugin collection is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with the BBC Vamp plugin collection.
- * If not, see <http://www.gnu.org/licenses/>.
-*/
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "Rhythm.h"
 /// @cond
 
@@ -56,7 +53,7 @@ Rhythm::~Rhythm() {
 }
 
 string Rhythm::getIdentifier() const {
-  return "bbcrd-rhythm";
+  return "bbc-rhythm";
 }
 
 string Rhythm::getName() const {
@@ -68,7 +65,7 @@ string Rhythm::getDescription() const {
 }
 
 string Rhythm::getMaker() const {
-  return "BBC Research and Development";
+  return "BBC";
 }
 
 int Rhythm::getPluginVersion() const {

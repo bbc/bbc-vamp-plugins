@@ -22,15 +22,15 @@ VAMP_SDK_DIR := /home/chrisbau/builds/vamp-plugin-sdk-v2.2.1
 
 # Edit this to the base name of your plugin library
 #
-PLUGIN_LIBRARY_NAME := bbcrd-vamp-plugins
+PLUGIN_LIBRARY_NAME := bbc-vamp-plugins
 
 # Edit this to list the .cpp or .c files in your plugin project
 #
-PLUGIN_SOURCES := Energy.cpp Intensity.cpp SpectralFlux.cpp Rhythm.cpp SpectralContrast.cpp plugins.cpp
+PLUGIN_SOURCES := Energy.cpp Intensity.cpp SpectralFlux.cpp Rhythm.cpp SpectralContrast.cpp SpeechMusicSegmenter.cpp plugins.cpp
 
 # Edit this to list the .h files in your plugin project
 #
-PLUGIN_HEADERS := Energy.h Intensity.h SpectralFlux.h Rhythm.h SpectralContrast.h 
+PLUGIN_HEADERS := Energy.h Intensity.h SpectralFlux.h Rhythm.h SpectralContrast.h SpeechMusicSegmenter.h
 
 ## Uncomment these for an OS/X universal binary (PPC and 32- and
 ## 64-bit Intel) supporting 10.4 or newer (if you have the 10.4 SDK):
