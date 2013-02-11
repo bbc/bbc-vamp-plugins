@@ -4,18 +4,6 @@
     All code here, except where otherwise indicated is licensed under the
     Apache Licence version 2.0.
 
-    Some third party libraries that are included are licensed under their
-    original licence terms.  See their respective "README" and/or "COPYING"
-    files for details.
-
-    Code comprising the patches to MythTV and code that is required for the
-    Universal Control server for MythTV are licensed under the GNU General
-    Public Licence Version 2.  This has been done to comply with the
-    licensing terms of MythTV itself.  Where this has been done, it will be
-    clearly indicated.
-
-
-
 ----------------------------------------------------------------------------
 
                                  Apache License

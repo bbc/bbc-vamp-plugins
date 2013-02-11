@@ -18,7 +18,7 @@
 # Edit this to the location of the Vamp plugin SDK, relative to your
 # project directory
 #
-VAMP_SDK_DIR := /home/chrisbau/builds/vamp-plugin-sdk-v2.2.1
+VAMP_SDK_DIR := ~/vamp-plugin-sdk-2.4
 
 # Edit this to the base name of your plugin library
 #
@@ -52,9 +52,9 @@ PLUGIN_HEADERS := Energy.h Intensity.h SpectralFlux.h Rhythm.h SpectralContrast.
 
 ##  Uncomment these for Linux using the standard tools:
 
-CXXFLAGS := -I$(VAMP_SDK_DIR) -Wall -fPIC
-PLUGIN_EXT := .so
-LDFLAGS := -shared -Wl,-soname=$(PLUGIN) $(VAMP_SDK_DIR)/libvamp-sdk.a -Wl,--version-script=vamp-plugin.map
+# CXXFLAGS := -I$(VAMP_SDK_DIR) -Wall -fPIC
+# PLUGIN_EXT := .so
+# LDFLAGS := -shared -Wl,-soname=$(PLUGIN) $(VAMP_SDK_DIR)/libvamp-sdk.a -Wl,--version-script=vamp-plugin.map
 
 
 ##  Uncomment these for a cross-compile from Linux to Windows using MinGW:

@@ -4,8 +4,7 @@ BBC Vamp plugin collection
 ## Introduction
 
 This is a collection of audio feature extraction algorithms written in the [Vamp
-plugin format](http://vamp-plugins.org). They were written by BBC Research and
-Development as part of the collaborative Making Musical Moods Metadata project.
+plugin format](http://vamp-plugins.org) by BBC Research and Development.
 
 Below is a list of plugins and their outputs. Detailed information about each of
 the features and the algorithms used is available in the full documentation
@@ -63,9 +62,8 @@ installation instructions in build/README.linux or build/README.osx.
 
 #### Configuration
 
-Edit Makefile and set `VAMP_SDK_DIR` to the directory containing the extracted
-Vamp SDK. Uncomment the build command corresponding to your build environment
-(see comments).
+Open 'Makefile', set `VAMP_SDK_DIR` to the directory containing the extracted
+Vamp SDK and uncomment the build command corresponding to your build environment.
 
 #### Compile
 
@@ -102,11 +100,6 @@ annotator and default settings:
 * [BBC R&D](http://www.bbc.co.uk/rd)
 * [QMUL Centre for Digital Music](http://www.elec.qmul.ac.uk/digitalmusic/)
 
-## Legal
+## Licensing terms and authorship
 
-This code is released under the
-[GNU GPLv3](http://www.gnu.org/licenses/gpl-3.0.html) licence.
-
-## Contact
-
-Please direct all queries to chris.baume@bbc.co.uk.
+Please refer to the 'COPYING' and 'AUTHORS' files.
