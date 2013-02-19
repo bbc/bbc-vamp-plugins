@@ -62,19 +62,26 @@ installation instructions in build/README.linux or build/README.osx.
 
 #### Configuration
 
-Open 'Makefile', set `VAMP_SDK_DIR` to the directory containing the extracted
-Vamp SDK and uncomment the build command corresponding to your build environment.
+Simply edit 'Makefile.inc' and set `VAMP_SDK_DIR` to the directory containing the extracted and compiled Vamp SDK.
 
 #### Compile
 
-With the project's folder as your working directory, run the following command:
+With the project's folder as your working directory, compile the plugin using the following command for linux:
 
-    make
+    make -f Makefile.linux
+
+or the following command for OSX:
+
+    make -f Makefile.osx
 
 then install it by moving the plugin to the system Vamp plugin folder (see
-[here](http://vamp-plugins.org/download.html#install) for defaults):
+[here](http://vamp-plugins.org/download.html#install) for defaults). Use the following command for linux:
 
     mv bbc-vamp-plugins.so /usr/local/lib/vamp
+
+or the following command for OSX:
+
+    mv bbc-vamp-plugins.dylib /Library/Audio/Plug-Ins/Vamp
 
 #### Documentation
 

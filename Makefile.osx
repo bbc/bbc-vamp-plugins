@@ -1,0 +1,23 @@
+include Makefile.inc
+
+OSX_SDK    := /Developer/SDKs/MacOSX10.6.sdk
+CFLAGS     := -O3 -isysroot $(OSX_SDK) -arch i386 -arch x86_64 -I$(VAMP_SDK_DIR)
+CXXFLAGS   := $(CFLAGS)
+PLUGIN_EXT := .dylib
+LDFLAGS    := -isysroot $(OSX_SDK) -arch i386 -arch x86_64 -dynamiclib $(VAMP_SDK_DIR)/libvamp-sdk.a -exported_symbols_list src/vamp-plugin.list -install_name $(PLUGIN_LIBRARY_NAME)$(PLUGIN_EXT)
+
+PLUGIN      ?= $(PLUGIN_LIBRARY_NAME)$(PLUGIN_EXT)
+CXX         ?= g++
+CC          ?= gcc
+
+OBJECTS := $(SOURCES:.cpp=.o)
+OBJECTS := $(OBJECTS:.c=.o)
+
+$(PLUGIN):	$(OBJECTS)
+		$(CXX) -o $@ $^ $(LDFLAGS)
+
+clean:		
+		rm $(OBJECTS)
+
+distclean:	clean
+		rm $(PLUGIN)

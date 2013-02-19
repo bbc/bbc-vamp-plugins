@@ -1,0 +1,21 @@
+include Makefile.inc
+
+CXXFLAGS   := -I$(VAMP_SDK_DIR) -fPIC
+PLUGIN_EXT := .so
+LDFLAGS    := -shared -Wl,-soname=$(PLUGIN) $(VAMP_SDK_DIR)/libvamp-sdk.a -Wl,--version-script=src/vamp-plugin.map
+
+PLUGIN      ?= $(PLUGIN_LIBRARY_NAME)$(PLUGIN_EXT)
+CXX         ?= g++
+CC          ?= gcc
+
+OBJECTS := $(SOURCES:.cpp=.o)
+OBJECTS := $(OBJECTS:.c=.o)
+
+$(PLUGIN):	$(OBJECTS)
+		$(CXX) -o $@ $^ $(LDFLAGS)
+
+clean:		
+		rm $(OBJECTS)
+
+distclean:	clean
+		rm $(PLUGIN)
