@@ -77,11 +77,11 @@ or the following command for OSX:
 then install it by moving the plugin to the system Vamp plugin folder (see
 [here](http://vamp-plugins.org/download.html#install) for defaults). Use the following command for linux:
 
-    mv bbc-vamp-plugins.so /usr/local/lib/vamp
+    mv bbc-vamp-plugins.so /usr/local/lib/vamp/
 
 or the following command for OSX:
 
-    mv bbc-vamp-plugins.dylib /Library/Audio/Plug-Ins/Vamp
+    mv bbc-vamp-plugins.dylib /Library/Audio/Plug-Ins/Vamp/
 
 #### Documentation
 
