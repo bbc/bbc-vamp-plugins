@@ -200,6 +200,7 @@ Energy::getOutputDescriptors() const
     lowenergy.hasKnownExtents = false;
     lowenergy.isQuantized = false;
     lowenergy.sampleType = OutputDescriptor::VariableSampleRate;
+    lowenergy.sampleRate = 0;
     lowenergy.hasDuration = false;
     list.push_back(lowenergy);
 
@@ -228,7 +229,7 @@ Energy::reset()
 Energy::FeatureSet
 Energy::process(const float *const *inputBuffers, Vamp::RealTime timestamp)
 {
-	float totalEnergy;
+	float totalEnergy = 0.f;
 	for (int i=0; i<m_blockSize; i++)
 	{
 		totalEnergy += inputBuffers[0][i]*inputBuffers[0][i];
@@ -252,7 +253,7 @@ Energy::FeatureSet
 Energy::getRemainingFeatures()
 {
 	// find average of RMS energy values
-	float total;
+	float total = 0.f;
 	for (unsigned i=0; i<rmsEnergy.size(); i++)
 	{
 		total += rmsEnergy.at(i);
@@ -263,7 +264,7 @@ Energy::getRemainingFeatures()
 	float threshold = average * threshRatio;
 
 	// find number of frames above/below threshold
-	float lowEnergy, highEnergy = 0;
+	float lowEnergy = 0.f, highEnergy = 0.f;
 	for (unsigned i=0; i<rmsEnergy.size(); i++)
 	{
 		if (rmsEnergy.at(i) < threshold)

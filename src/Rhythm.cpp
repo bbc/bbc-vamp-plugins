@@ -232,6 +232,7 @@ Rhythm::OutputList Rhythm::getOutputDescriptors() const {
   onset_curve.hasKnownExtents = false;
   onset_curve.isQuantized = false;
   onset_curve.sampleType = OutputDescriptor::VariableSampleRate;
+  onset_curve.sampleRate = 0;
   onset_curve.hasDuration = false;
   list.push_back(onset_curve);
 
@@ -245,6 +246,7 @@ Rhythm::OutputList Rhythm::getOutputDescriptors() const {
   average.hasKnownExtents = false;
   average.isQuantized = false;
   average.sampleType = OutputDescriptor::VariableSampleRate;
+  average.sampleRate = 0;
   average.hasDuration = false;
   list.push_back(average);
 
@@ -258,6 +260,7 @@ Rhythm::OutputList Rhythm::getOutputDescriptors() const {
   diff.hasKnownExtents = false;
   diff.isQuantized = false;
   diff.sampleType = OutputDescriptor::VariableSampleRate;
+  diff.sampleRate = 0;
   diff.hasDuration = false;
   list.push_back(diff);
 
@@ -269,6 +272,7 @@ Rhythm::OutputList Rhythm::getOutputDescriptors() const {
   onset.hasFixedBinCount = true;
   onset.binCount = 0;
   onset.sampleType = OutputDescriptor::VariableSampleRate;
+  onset.sampleRate = 0;
   list.push_back(onset);
 
   OutputDescriptor avg_onset_freq;
@@ -279,6 +283,7 @@ Rhythm::OutputList Rhythm::getOutputDescriptors() const {
   avg_onset_freq.hasFixedBinCount = true;
   avg_onset_freq.binCount = 1;
   avg_onset_freq.sampleType = OutputDescriptor::VariableSampleRate;
+  avg_onset_freq.sampleRate = 0;
   avg_onset_freq.hasKnownExtents = false;
   avg_onset_freq.isQuantized = false;
   avg_onset_freq.hasDuration = false;
@@ -292,6 +297,7 @@ Rhythm::OutputList Rhythm::getOutputDescriptors() const {
   rhythm_strength.hasFixedBinCount = true;
   rhythm_strength.binCount = 1;
   rhythm_strength.sampleType = OutputDescriptor::VariableSampleRate;
+  rhythm_strength.sampleRate = 0;
   rhythm_strength.hasKnownExtents = false;
   rhythm_strength.isQuantized = false;
   rhythm_strength.hasDuration = false;
@@ -307,6 +313,7 @@ Rhythm::OutputList Rhythm::getOutputDescriptors() const {
   autocor.hasKnownExtents = false;
   autocor.isQuantized = false;
   autocor.sampleType = OutputDescriptor::VariableSampleRate;
+  autocor.sampleRate = 0;
   autocor.hasDuration = false;
   list.push_back(autocor);
 
@@ -321,6 +328,7 @@ Rhythm::OutputList Rhythm::getOutputDescriptors() const {
   mean_correlation_peak.hasKnownExtents = false;
   mean_correlation_peak.isQuantized = false;
   mean_correlation_peak.sampleType = OutputDescriptor::VariableSampleRate;
+  mean_correlation_peak.sampleRate = 0;
   mean_correlation_peak.hasDuration = false;
   list.push_back(mean_correlation_peak);
 
@@ -335,6 +343,7 @@ Rhythm::OutputList Rhythm::getOutputDescriptors() const {
   peak_valley_ratio.hasKnownExtents = false;
   peak_valley_ratio.isQuantized = false;
   peak_valley_ratio.sampleType = OutputDescriptor::VariableSampleRate;
+  peak_valley_ratio.sampleRate = 0;
   peak_valley_ratio.hasDuration = false;
   list.push_back(peak_valley_ratio);
 
@@ -348,6 +357,7 @@ Rhythm::OutputList Rhythm::getOutputDescriptors() const {
   tempo.hasKnownExtents = false;
   tempo.isQuantized = false;
   tempo.sampleType = OutputDescriptor::VariableSampleRate;
+  tempo.sampleRate = 0;
   tempo.hasDuration = false;
   list.push_back(tempo);
 
@@ -578,6 +588,7 @@ float Rhythm::findRemainder(vector<int> peaks, int thisPeak) {
 }
 
 float Rhythm::findTempo(vector<int> peaks) {
+  if (peaks.empty()) return 0.f;
   float min = findRemainder(peaks, peaks.at(0));
   int minPos = 0;
   for (unsigned i = 1; i < peaks.size(); i++) {
@@ -601,6 +612,8 @@ void Rhythm::findCorrelationPeaks(vector<float> autocor_in, float percentile_in,
                                   int windowLength_in, int shift_in,
                                   vector<int>& peaks_out,
                                   vector<int>& valleys_out) {
+  if (autocor_in.empty()) return;
+
   vector<float> autocorSorted(autocor_in);
   std::sort(autocorSorted.begin(), autocorSorted.end());
   float autocorThreshold = autocorSorted.at(
