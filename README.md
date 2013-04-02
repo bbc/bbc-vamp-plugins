@@ -51,6 +51,8 @@ Download the correct plugin for your platform and extract the contents into the
 * [Linux (32-bit)](http://bbcarp.org.uk/dl/bbc-vamp-plugins_linux_i386.tar.gz)
 * [Linux (64-bit)](http://bbcarp.org.uk/dl/bbc-vamp-plugins_linux_amd64.tar.gz)
 
+Binaries last updated: 2013-04-02
+
 ## Installation from source
 
 The following instructions are written for Linux and OS X systems. For
