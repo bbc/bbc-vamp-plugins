@@ -1,0 +1,577 @@
+@prefix rdfs:     <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:      <http://www.w3.org/2001/XMLSchema#> .
+@prefix vamp:     <http://purl.org/ontology/vamp/> .
+@prefix plugbase: <http://vamp-plugins.org/rdf/plugins/bbc-vamp-plugins#> .
+@prefix owl:      <http://www.w3.org/2002/07/owl#> .
+@prefix dc:       <http://purl.org/dc/elements/1.1/> .
+@prefix af:       <http://purl.org/ontology/af/> .
+@prefix foaf:     <http://xmlns.com/foaf/0.1/> .
+@prefix cc:       <http://web.resource.org/cc/> .
+@prefix :         <#> .
+
+<>  a   vamp:PluginDescription ;
+    foaf:maker          <http://www.vamp-plugins.org/doap.rdf#template-generator> ;
+    foaf:primaryTopic   <http://vamp-plugins.org/rdf/plugins/bbc-vamp-plugins> .
+
+:bbc-vamp-plugins a  vamp:PluginLibrary ;
+    vamp:identifier "bbc-vamp-plugins"  ; 
+    vamp:available_plugin plugbase:bbc-energy ; 
+    vamp:available_plugin plugbase:bbc-intensity ; 
+    vamp:available_plugin plugbase:bbc-rhythm ; 
+    vamp:available_plugin plugbase:bbc-spectral-contrast ; 
+    vamp:available_plugin plugbase:bbc-spectral-flux ; 
+    vamp:available_plugin plugbase:bbc-speechmusic-segmenter ; 
+#   foaf:page <Place more-information HTML page URL here and uncomment> ;
+    .
+
+plugbase:bbc-energy a   vamp:Plugin ;
+    dc:title              "Energy" ;
+    vamp:name             "Energy" ;
+    dc:description        """""" ;
+    foaf:maker            [ foaf:name "BBC" ] ; # FIXME could give plugin author's URI here
+    dc:rights             """(c) 2013 British Broadcasting Corporation""" ;
+#   cc:license            <Place plugin license URI here and uncomment> ; 
+    vamp:identifier       "bbc-energy" ;
+    vamp:vamp_API_version vamp:api_version_2 ;
+    owl:versionInfo       "2" ;
+    vamp:input_domain     vamp:TimeDomain ;
+
+    vamp:parameter   plugbase:bbc-energy_param_threshold ;
+    vamp:parameter   plugbase:bbc-energy_param_root ;
+
+    vamp:output      plugbase:bbc-energy_output_rmsenergy ;
+    vamp:output      plugbase:bbc-energy_output_lowenergy ;
+    .
+plugbase:bbc-energy_param_threshold a  vamp:Parameter ;
+    vamp:identifier     "threshold" ;
+    dc:title            "Low energy threshold" ;
+    dc:format           "" ;
+    vamp:min_value       0 ;
+    vamp:max_value       10 ;
+    vamp:unit           ""  ;
+    vamp:default_value   1 ;
+    vamp:value_names     ();
+    .
+plugbase:bbc-energy_param_root a  vamp:QuantizedParameter ;
+    vamp:identifier     "root" ;
+    dc:title            "Use root" ;
+    dc:format           "" ;
+    vamp:min_value       0 ;
+    vamp:max_value       1 ;
+    vamp:unit           "" ;
+    vamp:quantize_step   1  ;
+    vamp:default_value   1 ;
+    vamp:value_names     ();
+    .
+plugbase:bbc-energy_output_rmsenergy a  vamp:DenseOutput ;
+    vamp:identifier       "rmsenergy" ;
+    dc:title              "RMS Energy" ;
+    dc:description        """RMS of the signal."""  ;
+    vamp:fixed_bin_count  "true" ;
+    vamp:unit             "" ;
+    vamp:bin_count        1 ;
+#   vamp:computes_event_type   <Place event type URI here and uncomment> ;
+#   vamp:computes_feature      <Place feature attribute URI here and uncomment> ;
+#   vamp:computes_signal_type  <Place signal type URI here and uncomment> ;
+    .
+plugbase:bbc-energy_output_lowenergy a  vamp:SparseOutput ;
+    vamp:identifier       "lowenergy" ;
+    dc:title              "Low Energy" ;
+    dc:description        """Percentage of track which is below the low energy threshold."""  ;
+    vamp:fixed_bin_count  "true" ;
+    vamp:unit             "" ;
+    vamp:bin_count        1 ;
+    vamp:sample_type      vamp:VariableSampleRate ;
+#   vamp:computes_event_type   <Place event type URI here and uncomment> ;
+#   vamp:computes_feature      <Place feature attribute URI here and uncomment> ;
+#   vamp:computes_signal_type  <Place signal type URI here and uncomment> ;
+    .
+plugbase:bbc-intensity a   vamp:Plugin ;
+    dc:title              "Intensity" ;
+    vamp:name             "Intensity" ;
+    dc:description        """""" ;
+    foaf:maker            [ foaf:name "BBC" ] ; # FIXME could give plugin author's URI here
+    dc:rights             """(c) 2013 British Broadcasting Corporation""" ;
+#   cc:license            <Place plugin license URI here and uncomment> ; 
+    vamp:identifier       "bbc-intensity" ;
+    vamp:vamp_API_version vamp:api_version_2 ;
+    owl:versionInfo       "1" ;
+    vamp:input_domain     vamp:FrequencyDomain ;
+
+
+    vamp:parameter   plugbase:bbc-intensity_param_numBands ;
+
+    vamp:output      plugbase:bbc-intensity_output_intensity ;
+    vamp:output      plugbase:bbc-intensity_output_intensity-ratio ;
+    .
+plugbase:bbc-intensity_param_numBands a  vamp:QuantizedParameter ;
+    vamp:identifier     "numBands" ;
+    dc:title            "Sub-bands" ;
+    dc:format           "" ;
+    vamp:min_value       2 ;
+    vamp:max_value       50 ;
+    vamp:unit           "" ;
+    vamp:quantize_step   1  ;
+    vamp:default_value   7 ;
+    vamp:value_names     ();
+    .
+plugbase:bbc-intensity_output_intensity a  vamp:DenseOutput ;
+    vamp:identifier       "intensity" ;
+    dc:title              "Intensity" ;
+    dc:description        """Sum of the FFT bin absolute values."""  ;
+    vamp:fixed_bin_count  "true" ;
+    vamp:unit             "" ;
+    vamp:bin_count        1 ;
+#   vamp:computes_event_type   <Place event type URI here and uncomment> ;
+#   vamp:computes_feature      <Place feature attribute URI here and uncomment> ;
+#   vamp:computes_signal_type  <Place signal type URI here and uncomment> ;
+    .
+plugbase:bbc-intensity_output_intensity-ratio a  vamp:DenseOutput ;
+    vamp:identifier       "intensity-ratio" ;
+    dc:title              "Intensity Ratio" ;
+    dc:description        """Sum of each sub-band's absolute values."""  ;
+    vamp:fixed_bin_count  "true" ;
+    vamp:unit             "" ;
+    vamp:bin_count        7 ;
+#   vamp:computes_event_type   <Place event type URI here and uncomment> ;
+#   vamp:computes_feature      <Place feature attribute URI here and uncomment> ;
+#   vamp:computes_signal_type  <Place signal type URI here and uncomment> ;
+    .
+plugbase:bbc-rhythm a   vamp:Plugin ;
+    dc:title              "Rhythm" ;
+    vamp:name             "Rhythm" ;
+    dc:description        """""" ;
+    foaf:maker            [ foaf:name "BBC" ] ; # FIXME could give plugin author's URI here
+    dc:rights             """(c) 2013 British Broadcasting Corporation""" ;
+#   cc:license            <Place plugin license URI here and uncomment> ; 
+    vamp:identifier       "bbc-rhythm" ;
+    vamp:vamp_API_version vamp:api_version_2 ;
+    owl:versionInfo       "1" ;
+    vamp:input_domain     vamp:FrequencyDomain ;
+
+
+    vamp:parameter   plugbase:bbc-rhythm_param_numBands ;
+    vamp:parameter   plugbase:bbc-rhythm_param_threshold ;
+    vamp:parameter   plugbase:bbc-rhythm_param_average_window ;
+    vamp:parameter   plugbase:bbc-rhythm_param_peak_window ;
+    vamp:parameter   plugbase:bbc-rhythm_param_min_bpm ;
+    vamp:parameter   plugbase:bbc-rhythm_param_max_bpm ;
+
+    vamp:output      plugbase:bbc-rhythm_output_onset_curve ;
+    vamp:output      plugbase:bbc-rhythm_output_average ;
+    vamp:output      plugbase:bbc-rhythm_output_diff ;
+    vamp:output      plugbase:bbc-rhythm_output_onset ;
+    vamp:output      plugbase:bbc-rhythm_output_avg-onset-freq ;
+    vamp:output      plugbase:bbc-rhythm_output_rhythm-strength ;
+    vamp:output      plugbase:bbc-rhythm_output_autocor ;
+    vamp:output      plugbase:bbc-rhythm_output_mean-correlation-peak ;
+    vamp:output      plugbase:bbc-rhythm_output_peak-valley-ratio ;
+    vamp:output      plugbase:bbc-rhythm_output_tempo ;
+    .
+plugbase:bbc-rhythm_param_numBands a  vamp:QuantizedParameter ;
+    vamp:identifier     "numBands" ;
+    dc:title            "Sub-bands" ;
+    dc:format           "" ;
+    vamp:min_value       2 ;
+    vamp:max_value       50 ;
+    vamp:unit           "" ;
+    vamp:quantize_step   1  ;
+    vamp:default_value   7 ;
+    vamp:value_names     ();
+    .
+plugbase:bbc-rhythm_param_threshold a  vamp:Parameter ;
+    vamp:identifier     "threshold" ;
+    dc:title            "Threshold" ;
+    dc:format           "" ;
+    vamp:min_value       0 ;
+    vamp:max_value       10 ;
+    vamp:unit           ""  ;
+    vamp:default_value   1 ;
+    vamp:value_names     ();
+    .
+plugbase:bbc-rhythm_param_average_window a  vamp:QuantizedParameter ;
+    vamp:identifier     "average_window" ;
+    dc:title            "Moving average window length" ;
+    dc:format           "frames" ;
+    vamp:min_value       1 ;
+    vamp:max_value       500 ;
+    vamp:unit           "frames" ;
+    vamp:quantize_step   1  ;
+    vamp:default_value   200 ;
+    vamp:value_names     ();
+    .
+plugbase:bbc-rhythm_param_peak_window a  vamp:QuantizedParameter ;
+    vamp:identifier     "peak_window" ;
+    dc:title            "Onset peak window length" ;
+    dc:format           "frames" ;
+    vamp:min_value       1 ;
+    vamp:max_value       20 ;
+    vamp:unit           "frames" ;
+    vamp:quantize_step   1  ;
+    vamp:default_value   6 ;
+    vamp:value_names     ();
+    .
+plugbase:bbc-rhythm_param_min_bpm a  vamp:QuantizedParameter ;
+    vamp:identifier     "min_bpm" ;
+    dc:title            "Minimum BPM" ;
+    dc:format           "bpm" ;
+    vamp:min_value       5 ;
+    vamp:max_value       300 ;
+    vamp:unit           "bpm" ;
+    vamp:quantize_step   1  ;
+    vamp:default_value   12 ;
+    vamp:value_names     ();
+    .
+plugbase:bbc-rhythm_param_max_bpm a  vamp:QuantizedParameter ;
+    vamp:identifier     "max_bpm" ;
+    dc:title            "Maximum BPM" ;
+    dc:format           "bpm" ;
+    vamp:min_value       50 ;
+    vamp:max_value       400 ;
+    vamp:unit           "bpm" ;
+    vamp:quantize_step   1  ;
+    vamp:default_value   300 ;
+    vamp:value_names     ();
+    .
+plugbase:bbc-rhythm_output_onset_curve a  vamp:SparseOutput ;
+    vamp:identifier       "onset_curve" ;
+    dc:title              "Onset curve" ;
+    dc:description        """Onset detection curve."""  ;
+    vamp:fixed_bin_count  "true" ;
+    vamp:unit             "" ;
+    vamp:bin_count        1 ;
+    vamp:sample_type      vamp:VariableSampleRate ;
+#   vamp:computes_event_type   <Place event type URI here and uncomment> ;
+#   vamp:computes_feature      <Place feature attribute URI here and uncomment> ;
+#   vamp:computes_signal_type  <Place signal type URI here and uncomment> ;
+    .
+plugbase:bbc-rhythm_output_average a  vamp:SparseOutput ;
+    vamp:identifier       "average" ;
+    dc:title              "Average" ;
+    dc:description        """Moving average of onset curve."""  ;
+    vamp:fixed_bin_count  "true" ;
+    vamp:unit             "" ;
+    vamp:bin_count        1 ;
+    vamp:sample_type      vamp:VariableSampleRate ;
+#   vamp:computes_event_type   <Place event type URI here and uncomment> ;
+#   vamp:computes_feature      <Place feature attribute URI here and uncomment> ;
+#   vamp:computes_signal_type  <Place signal type URI here and uncomment> ;
+    .
+plugbase:bbc-rhythm_output_diff a  vamp:SparseOutput ;
+    vamp:identifier       "diff" ;
+    dc:title              "Difference" ;
+    dc:description        """Difference between onset and average."""  ;
+    vamp:fixed_bin_count  "true" ;
+    vamp:unit             "" ;
+    vamp:bin_count        1 ;
+    vamp:sample_type      vamp:VariableSampleRate ;
+#   vamp:computes_event_type   <Place event type URI here and uncomment> ;
+#   vamp:computes_feature      <Place feature attribute URI here and uncomment> ;
+#   vamp:computes_signal_type  <Place signal type URI here and uncomment> ;
+    .
+plugbase:bbc-rhythm_output_onset a  vamp:SparseOutput ;
+    vamp:identifier       "onset" ;
+    dc:title              "Onset" ;
+    dc:description        """Point of onsets."""  ;
+    vamp:fixed_bin_count  "true" ;
+    vamp:unit             "" ;
+    vamp:bin_count        0 ;
+    vamp:sample_type      vamp:VariableSampleRate ;
+#   vamp:computes_event_type   <Place event type URI here and uncomment> ;
+#   vamp:computes_feature      <Place feature attribute URI here and uncomment> ;
+#   vamp:computes_signal_type  <Place signal type URI here and uncomment> ;
+    .
+plugbase:bbc-rhythm_output_avg-onset-freq a  vamp:SparseOutput ;
+    vamp:identifier       "avg-onset-freq" ;
+    dc:title              "Average Onset Frequency" ;
+    dc:description        """Rate of onsets per minute."""  ;
+    vamp:fixed_bin_count  "true" ;
+    vamp:unit             "" ;
+    vamp:bin_count        1 ;
+    vamp:sample_type      vamp:VariableSampleRate ;
+#   vamp:computes_event_type   <Place event type URI here and uncomment> ;
+#   vamp:computes_feature      <Place feature attribute URI here and uncomment> ;
+#   vamp:computes_signal_type  <Place signal type URI here and uncomment> ;
+    .
+plugbase:bbc-rhythm_output_rhythm-strength a  vamp:SparseOutput ;
+    vamp:identifier       "rhythm-strength" ;
+    dc:title              "Rhythm Strength" ;
+    dc:description        """Average value of peaks in onset curve."""  ;
+    vamp:fixed_bin_count  "true" ;
+    vamp:unit             "" ;
+    vamp:bin_count        1 ;
+    vamp:sample_type      vamp:VariableSampleRate ;
+#   vamp:computes_event_type   <Place event type URI here and uncomment> ;
+#   vamp:computes_feature      <Place feature attribute URI here and uncomment> ;
+#   vamp:computes_signal_type  <Place signal type URI here and uncomment> ;
+    .
+plugbase:bbc-rhythm_output_autocor a  vamp:SparseOutput ;
+    vamp:identifier       "autocor" ;
+    dc:title              "Autocorrelation" ;
+    dc:description        """Autocorrelation of onset detection curve."""  ;
+    vamp:fixed_bin_count  "true" ;
+    vamp:unit             "" ;
+    vamp:bin_count        1 ;
+    vamp:sample_type      vamp:VariableSampleRate ;
+#   vamp:computes_event_type   <Place event type URI here and uncomment> ;
+#   vamp:computes_feature      <Place feature attribute URI here and uncomment> ;
+#   vamp:computes_signal_type  <Place signal type URI here and uncomment> ;
+    .
+plugbase:bbc-rhythm_output_mean-correlation-peak a  vamp:SparseOutput ;
+    vamp:identifier       "mean-correlation-peak" ;
+    dc:title              "Mean Correlation Peak" ;
+    dc:description        """Mean of the peak autocorrelation values."""  ;
+    vamp:fixed_bin_count  "true" ;
+    vamp:unit             "" ;
+    vamp:bin_count        1 ;
+    vamp:sample_type      vamp:VariableSampleRate ;
+#   vamp:computes_event_type   <Place event type URI here and uncomment> ;
+#   vamp:computes_feature      <Place feature attribute URI here and uncomment> ;
+#   vamp:computes_signal_type  <Place signal type URI here and uncomment> ;
+    .
+plugbase:bbc-rhythm_output_peak-valley-ratio a  vamp:SparseOutput ;
+    vamp:identifier       "peak-valley-ratio" ;
+    dc:title              "Peak-Valley Ratio" ;
+    dc:description        """Ratio of the mean correlation peak to the mean correlation valley."""  ;
+    vamp:fixed_bin_count  "true" ;
+    vamp:unit             "" ;
+    vamp:bin_count        1 ;
+    vamp:sample_type      vamp:VariableSampleRate ;
+#   vamp:computes_event_type   <Place event type URI here and uncomment> ;
+#   vamp:computes_feature      <Place feature attribute URI here and uncomment> ;
+#   vamp:computes_signal_type  <Place signal type URI here and uncomment> ;
+    .
+plugbase:bbc-rhythm_output_tempo a  vamp:SparseOutput ;
+    vamp:identifier       "tempo" ;
+    dc:title              "Tempo" ;
+    dc:description        """Overall tempo of the track in BPM."""  ;
+    vamp:fixed_bin_count  "true" ;
+    vamp:unit             "bpm" ;
+    vamp:bin_count        1 ;
+    vamp:sample_type      vamp:VariableSampleRate ;
+#   vamp:computes_event_type   <Place event type URI here and uncomment> ;
+#   vamp:computes_feature      <Place feature attribute URI here and uncomment> ;
+#   vamp:computes_signal_type  <Place signal type URI here and uncomment> ;
+    .
+plugbase:bbc-spectral-contrast a   vamp:Plugin ;
+    dc:title              "Spectral Contrast" ;
+    vamp:name             "Spectral Contrast" ;
+    dc:description        """""" ;
+    foaf:maker            [ foaf:name "BBC" ] ; # FIXME could give plugin author's URI here
+    dc:rights             """(c) 2013 British Broadcasting Corporation""" ;
+#   cc:license            <Place plugin license URI here and uncomment> ; 
+    vamp:identifier       "bbc-spectral-contrast" ;
+    vamp:vamp_API_version vamp:api_version_2 ;
+    owl:versionInfo       "1" ;
+    vamp:input_domain     vamp:FrequencyDomain ;
+
+
+    vamp:parameter   plugbase:bbc-spectral-contrast_param_alpha ;
+    vamp:parameter   plugbase:bbc-spectral-contrast_param_numBands ;
+
+    vamp:output      plugbase:bbc-spectral-contrast_output_valleys ;
+    vamp:output      plugbase:bbc-spectral-contrast_output_peaks ;
+    vamp:output      plugbase:bbc-spectral-contrast_output_mean ;
+    .
+plugbase:bbc-spectral-contrast_param_alpha a  vamp:Parameter ;
+    vamp:identifier     "alpha" ;
+    dc:title            "Alpha" ;
+    dc:format           "" ;
+    vamp:min_value       0 ;
+    vamp:max_value       1 ;
+    vamp:unit           ""  ;
+    vamp:default_value   0.02 ;
+    vamp:value_names     ();
+    .
+plugbase:bbc-spectral-contrast_param_numBands a  vamp:QuantizedParameter ;
+    vamp:identifier     "numBands" ;
+    dc:title            "Sub-bands" ;
+    dc:format           "" ;
+    vamp:min_value       2 ;
+    vamp:max_value       50 ;
+    vamp:unit           "" ;
+    vamp:quantize_step   1  ;
+    vamp:default_value   7 ;
+    vamp:value_names     ();
+    .
+plugbase:bbc-spectral-contrast_output_valleys a  vamp:DenseOutput ;
+    vamp:identifier       "valleys" ;
+    dc:title              "Spectral Valleys" ;
+    dc:description        """Valley of the spectrum."""  ;
+    vamp:fixed_bin_count  "true" ;
+    vamp:unit             "" ;
+    vamp:bin_count        7 ;
+#   vamp:computes_event_type   <Place event type URI here and uncomment> ;
+#   vamp:computes_feature      <Place feature attribute URI here and uncomment> ;
+#   vamp:computes_signal_type  <Place signal type URI here and uncomment> ;
+    .
+plugbase:bbc-spectral-contrast_output_peaks a  vamp:DenseOutput ;
+    vamp:identifier       "peaks" ;
+    dc:title              "Spectral Peaks" ;
+    dc:description        """Peak of the spectrum."""  ;
+    vamp:fixed_bin_count  "true" ;
+    vamp:unit             "" ;
+    vamp:bin_count        7 ;
+#   vamp:computes_event_type   <Place event type URI here and uncomment> ;
+#   vamp:computes_feature      <Place feature attribute URI here and uncomment> ;
+#   vamp:computes_signal_type  <Place signal type URI here and uncomment> ;
+    .
+plugbase:bbc-spectral-contrast_output_mean a  vamp:DenseOutput ;
+    vamp:identifier       "mean" ;
+    dc:title              "Spectral Mean" ;
+    dc:description        """Mean of the spectrum."""  ;
+    vamp:fixed_bin_count  "true" ;
+    vamp:unit             "" ;
+    vamp:bin_count        7 ;
+#   vamp:computes_event_type   <Place event type URI here and uncomment> ;
+#   vamp:computes_feature      <Place feature attribute URI here and uncomment> ;
+#   vamp:computes_signal_type  <Place signal type URI here and uncomment> ;
+    .
+plugbase:bbc-spectral-flux a   vamp:Plugin ;
+    dc:title              "Spectral Flux" ;
+    vamp:name             "Spectral Flux" ;
+    dc:description        """""" ;
+    foaf:maker            [ foaf:name "BBC" ] ; # FIXME could give plugin author's URI here
+    dc:rights             """(c) 2013 British Broadcasting Corporation""" ;
+#   cc:license            <Place plugin license URI here and uncomment> ; 
+    vamp:identifier       "bbc-spectral-flux" ;
+    vamp:vamp_API_version vamp:api_version_2 ;
+    owl:versionInfo       "1" ;
+    vamp:input_domain     vamp:FrequencyDomain ;
+
+
+    vamp:parameter   plugbase:bbc-spectral-flux_param_usel2 ;
+
+    vamp:output      plugbase:bbc-spectral-flux_output_spectral-flux ;
+    .
+plugbase:bbc-spectral-flux_param_usel2 a  vamp:QuantizedParameter ;
+    vamp:identifier     "usel2" ;
+    dc:title            "Use L2 norm over L1" ;
+    dc:format           "" ;
+    vamp:min_value       0 ;
+    vamp:max_value       1 ;
+    vamp:unit           "" ;
+    vamp:quantize_step   1  ;
+    vamp:default_value   0 ;
+    vamp:value_names     ();
+    .
+plugbase:bbc-spectral-flux_output_spectral-flux a  vamp:DenseOutput ;
+    vamp:identifier       "spectral-flux" ;
+    dc:title              "Spectral Flux" ;
+    dc:description        """Difference between FFT bin values."""  ;
+    vamp:fixed_bin_count  "true" ;
+    vamp:unit             "" ;
+    vamp:bin_count        1 ;
+#   vamp:computes_event_type   <Place event type URI here and uncomment> ;
+#   vamp:computes_feature      <Place feature attribute URI here and uncomment> ;
+#   vamp:computes_signal_type  <Place signal type URI here and uncomment> ;
+    .
+plugbase:bbc-speechmusic-segmenter a   vamp:Plugin ;
+    dc:title              "Speech/Music segmenter" ;
+    vamp:name             "Speech/Music segmenter" ;
+    dc:description        """A simple speech/music segmenter""" ;
+    foaf:maker            [ foaf:name "BBC" ] ; # FIXME could give plugin author's URI here
+    dc:rights             """(c) 2011 British Broadcasting Corporation""" ;
+#   cc:license            <Place plugin license URI here and uncomment> ; 
+    vamp:identifier       "bbc-speechmusic-segmenter" ;
+    vamp:vamp_API_version vamp:api_version_2 ;
+    owl:versionInfo       "1" ;
+    vamp:input_domain     vamp:TimeDomain ;
+
+    vamp:parameter   plugbase:bbc-speechmusic-segmenter_param_resolution ;
+    vamp:parameter   plugbase:bbc-speechmusic-segmenter_param_change_threshold ;
+    vamp:parameter   plugbase:bbc-speechmusic-segmenter_param_decision_threshold ;
+    vamp:parameter   plugbase:bbc-speechmusic-segmenter_param_min_music_length ;
+    vamp:parameter   plugbase:bbc-speechmusic-segmenter_param_margin ;
+
+    vamp:output      plugbase:bbc-speechmusic-segmenter_output_segmentation ;
+    vamp:output      plugbase:bbc-speechmusic-segmenter_output_skewness ;
+    .
+plugbase:bbc-speechmusic-segmenter_param_resolution a  vamp:QuantizedParameter ;
+    vamp:identifier     "resolution" ;
+    dc:title            "Resolution" ;
+    dc:format           "" ;
+    vamp:min_value       1 ;
+    vamp:max_value       1024 ;
+    vamp:unit           "" ;
+    vamp:quantize_step   1  ;
+    vamp:default_value   256 ;
+    vamp:value_names     ();
+    .
+plugbase:bbc-speechmusic-segmenter_param_change_threshold a  vamp:Parameter ;
+    vamp:identifier     "change_threshold" ;
+    dc:title            "Change threshold" ;
+    dc:format           "" ;
+    vamp:min_value       0 ;
+    vamp:max_value       1 ;
+    vamp:unit           ""  ;
+    vamp:default_value   0.0781 ;
+    vamp:value_names     ();
+    .
+plugbase:bbc-speechmusic-segmenter_param_decision_threshold a  vamp:Parameter ;
+    vamp:identifier     "decision_threshold" ;
+    dc:title            "Decision threshold" ;
+    dc:format           "" ;
+    vamp:min_value       0 ;
+    vamp:max_value       1 ;
+    vamp:unit           ""  ;
+    vamp:default_value   0.2734 ;
+    vamp:value_names     ();
+    .
+plugbase:bbc-speechmusic-segmenter_param_min_music_length a  vamp:Parameter ;
+    vamp:identifier     "min_music_length" ;
+    dc:title            "Minimum music segment length" ;
+    dc:format           "" ;
+    vamp:min_value       0 ;
+    vamp:max_value       100 ;
+    vamp:unit           ""  ;
+    vamp:default_value   0 ;
+    vamp:value_names     ();
+    .
+plugbase:bbc-speechmusic-segmenter_param_margin a  vamp:Parameter ;
+    vamp:identifier     "margin" ;
+    dc:title            "Margin" ;
+    dc:format           "" ;
+    vamp:min_value       0 ;
+    vamp:max_value       50 ;
+    vamp:unit           ""  ;
+    vamp:default_value   14 ;
+    vamp:value_names     ();
+    .
+plugbase:bbc-speechmusic-segmenter_output_segmentation a  vamp:SparseOutput ;
+    vamp:identifier       "segmentation" ;
+    dc:title              "Segmentation" ;
+    dc:description        """Segmentation"""  ;
+    vamp:fixed_bin_count  "true" ;
+    vamp:unit             "segment-type" ;
+    a                     vamp:QuantizedOutput ;
+    vamp:quantize_step    1  ;
+    a                 vamp:KnownExtentsOutput ;
+    vamp:min_value    0  ;
+    vamp:max_value    2  ;
+    vamp:bin_count        1 ;
+    vamp:sample_type      vamp:VariableSampleRate ;
+    vamp:sample_rate      inf ;
+#   vamp:computes_event_type   <Place event type URI here and uncomment> ;
+#   vamp:computes_feature      <Place feature attribute URI here and uncomment> ;
+#   vamp:computes_signal_type  <Place signal type URI here and uncomment> ;
+    .
+plugbase:bbc-speechmusic-segmenter_output_skewness a  vamp:SparseOutput ;
+    vamp:identifier       "skewness" ;
+    dc:title              "Detection function" ;
+    dc:description        """Detection function"""  ;
+    vamp:fixed_bin_count  "true" ;
+    vamp:unit             "segment-type" ;
+    a                     vamp:QuantizedOutput ;
+    vamp:quantize_step    1  ;
+    a                 vamp:KnownExtentsOutput ;
+    vamp:min_value    0  ;
+    vamp:max_value    2  ;
+    vamp:bin_count        1 ;
+    vamp:sample_type      vamp:VariableSampleRate ;
+    vamp:sample_rate      inf ;
+#   vamp:computes_event_type   <Place event type URI here and uncomment> ;
+#   vamp:computes_feature      <Place feature attribute URI here and uncomment> ;
+#   vamp:computes_signal_type  <Place signal type URI here and uncomment> ;
+    .
+

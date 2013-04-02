@@ -42,7 +42,16 @@ the features and the algorithms used is available in the full documentation
 1. Segmentation
 1. Detection function
 
-## Installation
+## Binary installation
+Download the correct plugin for your platform and extract the contents into the
+[Vamp system plugin folder](http://vamp-plugins.org/download.html#install).
+
+* [Windows](http://bbcarp.org.uk/dl/bbc-vamp-plugins_windows.zip)
+* [OS X](http://bbcarp.org.uk/dl/bbc-vamp-plugins_osx.tar.gz)
+* [Linux (32-bit)](http://bbcarp.org.uk/dl/bbc-vamp-plugins_linux_i386.tar.gz)
+* [Linux (64-bit)](http://bbcarp.org.uk/dl/bbc-vamp-plugins_linux_amd64.tar.gz)
+
+## Installation from source
 
 The following instructions are written for Linux and OS X systems. For
 installing on Windows, please follow the instructions where possible, but refer
@@ -74,14 +83,14 @@ or the following command for OSX:
 
     make -f Makefile.osx
 
-then install it by moving the plugin and category files to the system Vamp plugin folder (see
+then install it by moving the plugin, category and RDF files to the system Vamp plugin folder (see
 [here](http://vamp-plugins.org/download.html#install) for defaults). Use the following command for linux:
 
-    mv bbc-vamp-plugins.so bbc-vamp-plugins.cat /usr/local/lib/vamp/
+    mv bbc-vamp-plugins.so bbc-vamp-plugins.cat bbc-vamp-plugins.n3 /usr/local/lib/vamp/
 
 or the following command for OSX:
 
-    mv bbc-vamp-plugins.dylib bbc-vamp-plugins.cat /Library/Audio/Plug-Ins/Vamp/
+    mv bbc-vamp-plugins.dylib bbc-vamp-plugins.cat bbc-vamp-plugins.n3 /Library/Audio/Plug-Ins/Vamp/
 
 #### Documentation
 
