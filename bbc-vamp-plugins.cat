@@ -1,0 +1,6 @@
+vamp:bbc-vamp-plugins:bbc-energy::Low Level Features
+vamp:bbc-vamp-plugins:bbc-intensity::Low Level Features
+vamp:bbc-vamp-plugins:bbc-rhythm::Low Level Features
+vamp:bbc-vamp-plugins:bbc-spectral-contrast::Low Level Features
+vamp:bbc-vamp-plugins:bbc-spectral-flux::Low Level Features
+vamp:bbc-vamp-plugins:bbc-speechmusic-segmenter::Classification
