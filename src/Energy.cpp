@@ -253,12 +253,13 @@ Energy::FeatureSet
 Energy::getRemainingFeatures()
 {
 	// find average of RMS energy values
-	float total = 0.f;
+	float total = 0.f, average = 0.f;
 	for (unsigned i=0; i<rmsEnergy.size(); i++)
 	{
 		total += rmsEnergy.at(i);
 	}
-	float average = total / (float)rmsEnergy.size();
+	if (rmsEnergy.size() != 0)
+		average = total / (float)rmsEnergy.size();
 
 	// find threshold value
 	float threshold = average * threshRatio;
@@ -274,7 +275,9 @@ Energy::getRemainingFeatures()
 	}
 
 	// calculate low energy ratio
-	float lowEnergyRatio = (100.f * lowEnergy) / (lowEnergy + highEnergy);
+	float lowEnergyRatio = 0.f;
+	if (lowEnergy + highEnergy != 0)
+		lowEnergyRatio = (100.f * lowEnergy) / (lowEnergy + highEnergy);
 
 	FeatureSet output;
 	Feature f;

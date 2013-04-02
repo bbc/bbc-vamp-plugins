@@ -422,6 +422,9 @@ Rhythm::FeatureSet Rhythm::getRemainingFeatures() {
   FeatureSet output;
   int frames = intensity.size();
 
+  if (frames == 0)
+    return output;
+
   // find envelope by convolving each subband with half-hanning window
   vector<vector<float> > envelope;
   halfHannConvolve(envelope);

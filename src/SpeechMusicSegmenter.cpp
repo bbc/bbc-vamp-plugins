@@ -326,6 +326,7 @@ SpeechMusicSegmenter::reset()
 {
     // Clear buffers, reset stored values, etc
     m_zcr.erase(m_zcr.begin(), m_zcr.end());
+    m_nframes = 0;
 }
 
 SpeechMusicSegmenter::FeatureSet
@@ -410,7 +411,7 @@ SpeechMusicSegmenter::getSkewnessFunction()
     for (int n = 0; n < m_nframes; n++) {
         int i = 0;
         mean_zcr = 0.0;
-        while (i < resolution) {
+        while (i < resolution && n+i < m_zcr.size()) {
             mean_zcr += m_zcr[n + i]; 
             i += 1;
         }
@@ -418,7 +419,7 @@ SpeechMusicSegmenter::getSkewnessFunction()
         i = 0;
         int above = 0;
         int below = 0;
-        while (i < resolution) {
+        while (i < resolution && n+i < m_zcr.size()) {
             if (m_zcr[n + i] > (mean_zcr + threshold_d)) above += 1;
             if (m_zcr[n + i] < (mean_zcr - threshold_d)) below += 1;
             i += 1;
