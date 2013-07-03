@@ -7,8 +7,8 @@ This is a collection of audio feature extraction algorithms written in the [Vamp
 plugin format](http://vamp-plugins.org) by BBC Research and Development.
 
 Below is a list of plugins and their outputs. Detailed information about each of
-the features and the algorithms used is available in the full documentation
-(see below).
+the features and the algorithms used is contained in the full documentation, which is
+available to download from the [releases page](https://github.com/bbcrd/bbc-vamp-plugins/releases).
 
 ##### Energy
 1. RMS energy
@@ -43,15 +43,9 @@ the features and the algorithms used is available in the full documentation
 1. Detection function
 
 ## Binary installation
-Download the correct plugin for your platform and extract the contents into the
-[Vamp system plugin folder](http://vamp-plugins.org/download.html#install).
-
-* [Windows](http://bbcarp.org.uk/dl/bbc-vamp-plugins_windows.zip)
-* [OS X](http://bbcarp.org.uk/dl/bbc-vamp-plugins_osx.tar.gz)
-* [Linux (32-bit)](http://bbcarp.org.uk/dl/bbc-vamp-plugins_linux_i386.tar.gz)
-* [Linux (64-bit)](http://bbcarp.org.uk/dl/bbc-vamp-plugins_linux_amd64.tar.gz)
-
-Binaries last updated: 2013-04-02
+Download the correct plugin for your platform from the
+[releases page](https://github.com/bbcrd/bbc-vamp-plugins/releases) and extract
+the contents into the [Vamp system plugin folder](http://vamp-plugins.org/download.html#install).
 
 ## Installation from source
 
@@ -97,9 +91,9 @@ or the following command for OSX:
 #### Documentation
 
 To generate the documentation, install [Doxygen](http://www.doxygen.org) and
-run the following command. The documents will appear in doc/html/index.html
+run the following command from the src folder. The documents will appear in doc/html/index.html
 
-    doxygen bbc-vamp-plugins.doxyfile
+    doxygen ../bbc-vamp-plugins.doxyfile
 
 ## Usage
 
