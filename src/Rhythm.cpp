@@ -550,11 +550,20 @@ Rhythm::FeatureSet Rhythm::getRemainingFeatures() {
   output[8].push_back(f_peakValleyRatio);
 
   // find tempo from peaks
-  float tempo = findTempo(autocorPeaks);
+  vector<float> tempo;
+  findTempo(autocorPeaks, tempo);
   Feature f_tempo;
   f_tempo.hasTimestamp = true;
   f_tempo.timestamp = Vamp::RealTime::fromSeconds(0.0);
-  f_tempo.values.push_back(tempo);
+  if (tempo.size() > 0 && tempo[0] < tempo[1]) {
+    f_tempo.values.push_back(tempo[0]);
+    f_tempo.values.push_back(tempo[1]);
+    f_tempo.values.push_back(tempo[2]);
+  } else if (tempo.size() > 0) {
+    f_tempo.values.push_back(tempo[1]);
+    f_tempo.values.push_back(tempo[0]);
+    f_tempo.values.push_back(1.0f-tempo[2]);
+  }
   output[9].push_back(f_tempo);
 
   return output;
@@ -590,18 +599,43 @@ float Rhythm::findRemainder(vector<int> peaks, int thisPeak) {
   return total;
 }
 
-float Rhythm::findTempo(vector<int> peaks) {
-  if (peaks.empty()) return 0.f;
-  float min = findRemainder(peaks, peaks.at(0));
-  int minPos = 0;
-  for (unsigned i = 1; i < peaks.size(); i++) {
-    float result = findRemainder(peaks, peaks.at(i));
-    if (result < min) {
-      min = result;
-      minPos = i;
+void Rhythm::findTempo(vector<int> peaks, vector<float> &result) {
+  if (peaks.empty()) return;
+  float min = 1000.f, min2 = 1000.f;
+  float tempo1, tempo2;
+  int minPos = 0, minPos2 = 0;
+
+  // if only one tempo is found, use half or double, depending on the tempo
+  if (peaks.size() < 2) {
+    tempo1 = 60.f / (peaks.at(0) * m_stepSize / m_sampleRate);
+    if (tempo1 > 120.0f) {
+      tempo2 = tempo1/2;
+    } else {
+      tempo2 = tempo1*2;
     }
+    min=1;
+    min2=2;
+
+  // otherwise find the two largest common divisors
+  } else {
+  
+    for (unsigned i = 0; i < peaks.size(); i++) {
+      float result = findRemainder(peaks, peaks.at(i));
+      if (result < min) {
+        min = result;
+        minPos = i;
+      } else if (result < min2) {
+        min2 = result;
+        minPos2 = i;
+      }
+    }
+    tempo1 = 60.f / (peaks.at(minPos) * m_stepSize / m_sampleRate);
+    tempo2 = 60.f / (peaks.at(minPos2) * m_stepSize / m_sampleRate);
   }
-  return 60.f / (peaks.at(minPos) * m_stepSize / m_sampleRate);
+
+  result.push_back(tempo1);
+  result.push_back(tempo2);
+  result.push_back(min/min2);
 }
 
 float Rhythm::findMeanPeak(vector<float> signal, vector<int> peaks, int shift) {

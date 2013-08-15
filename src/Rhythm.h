@@ -185,7 +185,7 @@ class Rhythm : public Vamp::Plugin {
   float halfHanning(float n);
   float canny(float n);
   float findRemainder(vector<int> peaks, int thisPeak);
-  float findTempo(vector<int> peaks);
+  void findTempo(vector<int> peaks, vector<float> &result);
   float findMeanPeak(vector<float> signal, vector<int> peaks, int shift);
   void findCorrelationPeaks(vector<float> autocor_in, float percentile_in,
                             int windowLength_in, int shift_in,
