@@ -20,31 +20,53 @@
 
 #include <cmath>
 #include <vector>
+#include <algorithm>
 #include <vamp-sdk/Plugin.h>
 
 using std::string;
 using std::vector;
 
 /*!
- * \brief Calculates the RMS energy and low energy ratio of a signal
+ * \brief Calculates the RMS energy and related features
  *
  * \section Outputs
  * \par RMS energy
  * The root mean square energy of the signal.
+ * \par RMS energy delta
+ * The difference between the RMS energy of the current frame and the last.
+ * \par Moving average
+ * The Xth percentile of the RMS energy within a window.
+ * \par Dip probability
+ * The ratio of frames that have dipped below the dip threshold within the
+ * averaging window, where the threshold is a product of the moving average.
  * \par Low energy ratio
- * Percentage of blocks/frames whose energy falls below a threshold.
+ * Percentage of frames in the file whose energy falls below a threshold, which
+ * is a product of the overall mean energy.
  *
  * \section Parameters
- * \par Low energy threshold
- * Ratio of threshold to the RMS energy (default = 1.0)
  * \par Use root
  * Whether to apply the square root in RMS calculation. (default = 1)
+ * \par Moving average window size
+ * The size of the averaging window, in seconds. (default = 1.0)
+ * \par Moving average percentile
+ * The percentile used to calculate the average. (default = 3.0)
+ * \par Dip threshold
+ * The threshold for calculating the dip, which is multiplied by the moving
+ * average. (default = 3.0)
+ * \par Low energy threshold
+ * The threshold for calculating low energy, which is multiplied by the overall
+ * mean RMS energy (default = 1.0)
  *
  * \section Description
  *
  * <b>RMS energy</b> for each block is calculated as follows. The square root
  * can be removed using the 'Use root' parameter (default = true)
  * \f[ RMS = \sqrt{\displaystyle\sum\limits_{i=0}^n x_i^2} \f]
+ *
+ * The <b>dip threshold</b> is a simple but effective speech/music
+ * discriminator. It is defined as the ratio of frames in a moving window which
+ * fall below a threshold, where the threshold is a product of the moving
+ * average.
  *
  * The <b>low energy ratio</b> is the percentage of blocks which fall below
  * a certain RMS energy threshold. The threshold is set using the 'Low energy
@@ -89,9 +111,14 @@ protected:
     int m_blockSize, m_stepSize;
     /// @endcond
 
+    float sampleRate;   /*!< Variable to store input sample rate, used for calculating window sizes */
     bool useRoot;				/*!< Flag to indicate whether to find root of mean energy */
     float threshRatio;			/*!< Ratio of threshold to average energy */
     vector<float> rmsEnergy;	/*!< Variable to store RMS values from previous blocks in order to calculate mean */
+    float prevRMS; /*!< Variable to store RMS value of previous block */
+    float avgWindowLength; /*!< Length of window to use for averaging, in seconds */
+    float avgPercentile; /*!< Percentile to calculate as average. */
+    float dipThresh; /*!< Threshold to use for calculating dips, as a multiple of the moving average. */
 };
 
 

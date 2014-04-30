@@ -15,6 +15,9 @@ page](https://github.com/bbcrd/bbc-vamp-plugins/releases).
   1. Peak/trough
 * __Energy__
   1. RMS energy
+  1. RMS energy delta
+  1. Moving average
+  1. Dip probability
   1. Low energy ratio
 * __Intensity__
   1. Intensity
