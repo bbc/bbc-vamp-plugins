@@ -3,55 +3,55 @@ BBC Vamp plugin collection
 
 ## Introduction
 
-This is a collection of audio feature extraction algorithms written in the [Vamp
-plugin format](http://vamp-plugins.org) by BBC Research and Development.
+This is a collection of audio feature extraction algorithms written in the
+[Vamp plugin format](http://vamp-plugins.org) by BBC Research and Development.
 
-Below is a list of plugins and their outputs. Detailed information about each of
-the features and the algorithms used is contained in the full documentation, which is
-available to download from the [releases page](https://github.com/bbcrd/bbc-vamp-plugins/releases).
+Below is a list of plugins and their outputs. Detailed information about each
+of the features and the algorithms used is contained in the full documentation,
+which is available to download from the [releases
+page](https://github.com/bbcrd/bbc-vamp-plugins/releases).
 
-##### Energy
-1. RMS energy
-1. Low energy ratio
-
-##### Intensity
-1. Intensity
-1. Intensity ratio
-
-##### Rhythm
-1. Onset detection curve
-1. Moving average of the onset detection curve
-1. Difference between 1 and 2
-1. Onsets
-1. Average onset frequency
-1. Rhythm strength
-1. Autocorrelation
-1. Mean correlation peak
-1. Peak valley ratio
-1. Tempo
-
-##### Spectral Contrast
-1. Valleys
-1. Peaks
-1. Mean
-
-##### Spectral Flux
-1. Spectral flux
-
-##### Speech/music segmenter
-1. Segmentation
-1. Detection function
+* __Peaks__
+  1. Peak/trough
+* __Energy__
+  1. RMS energy
+  1. Low energy ratio
+* __Intensity__
+  1. Intensity
+  1. Intensity ratio
+* __Rhythm__
+  1. Onset detection curve
+  1. Moving average of the onset detection curve
+  1. Difference between 1 and 2
+  1. Onsets
+  1. Average onset frequency
+  1. Rhythm strength
+  1. Autocorrelation
+  1. Mean correlation peak
+  1. Peak valley ratio
+  1. Tempo
+* __Spectral Contrast__
+  1. Valleys
+  1. Peaks
+  1. Mean
+* __Spectral Flux__
+  1. Spectral flux
+* __Speech/music segmenter__
+  1. Segmentation
+  1. Detection function
 
 ## Binary installation
-Download the correct plugin for your platform from the
-[releases page](https://github.com/bbcrd/bbc-vamp-plugins/releases) and extract
-the contents into the [Vamp system plugin folder](http://vamp-plugins.org/download.html#install).
+Download the correct plugin for your platform from the [releases
+page](https://github.com/bbcrd/bbc-vamp-plugins/releases) and extract the
+contents into the [Vamp system plugin
+folder](http://vamp-plugins.org/download.html#install).
 
 ## Installation from source
 
 The following instructions are written for Linux and OS X systems. For
 installing on Windows, please follow the instructions where possible, but refer
-to [this document](http://code.soundsoftware.ac.uk/projects/vamp-plugin-sdk/wiki/mtp2)
+to [this
+document](http://code.soundsoftware.ac.uk/projects/vamp-plugin-sdk/wiki/mtp2)
 when compiling.
 
 #### Dependencies
@@ -67,11 +67,13 @@ installation instructions in build/README.linux or build/README.osx.
 
 #### Configuration
 
-Simply edit 'Makefile.inc' and set `VAMP_SDK_DIR` to the directory containing the extracted and compiled Vamp SDK.
+Simply edit 'Makefile.inc' and set `VAMP_SDK_DIR` to the directory containing
+the extracted and compiled Vamp SDK.
 
 #### Compile
 
-With the project's folder as your working directory, compile the plugin using the following command for linux:
+With the project's folder as your working directory, compile the plugin using
+the following command for linux:
 
     make -f Makefile.linux
 
@@ -79,8 +81,9 @@ or the following command for OSX:
 
     make -f Makefile.osx
 
-then install it by moving the plugin, category and RDF files to the system Vamp plugin folder (see
-[here](http://vamp-plugins.org/download.html#install) for defaults). Use the following command for linux:
+then install it by moving the plugin, category and RDF files to the system Vamp
+plugin folder (see [here](http://vamp-plugins.org/download.html#install) for
+defaults). Use the following command for linux:
 
     mv bbc-vamp-plugins.so bbc-vamp-plugins.cat bbc-vamp-plugins.n3 /usr/local/lib/vamp/
 
@@ -91,7 +94,8 @@ or the following command for OSX:
 #### Documentation
 
 To generate the documentation, install [Doxygen](http://www.doxygen.org) and
-run the following command from the src folder. The documents will appear in doc/html/index.html
+run the following command from the src folder. The documents will appear in
+doc/html/index.html
 
     doxygen ../bbc-vamp-plugins.doxyfile
 

@@ -9,6 +9,7 @@ SOURCES := src/Energy.cpp \
            src/Rhythm.cpp \
            src/SpectralContrast.cpp \
            src/SpeechMusicSegmenter.cpp \
+           src/Peaks.cpp \
            src/plugins.cpp
 
 HEADERS := src/Energy.h \
@@ -16,4 +17,5 @@ HEADERS := src/Energy.h \
            src/SpectralFlux.h \
            src/Rhythm.h \
            src/SpectralContrast.h \
-           src/SpeechMusicSegmenter.h
+           src/SpeechMusicSegmenter.h \
+           src/Peaks.h

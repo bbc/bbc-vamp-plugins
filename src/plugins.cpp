@@ -11,6 +11,7 @@
 #include "Rhythm.h"
 #include "SpectralContrast.h"
 #include "SpeechMusicSegmenter.h"
+#include "Peaks.h"
 
 // Declare one static adapter here for each plugin class in this library.
 
@@ -20,6 +21,7 @@ static Vamp::PluginAdapter<SpectralFlux> flux;
 static Vamp::PluginAdapter<Rhythm> rhythm;
 static Vamp::PluginAdapter<SpectralContrast> spectralcontrast;
 static Vamp::PluginAdapter<SpeechMusicSegmenter> speechMusicSegmenter;
+static Vamp::PluginAdapter<Peaks> peaks;
 
 // This is the entry-point for the library, and the only function that
 // needs to be publicly exported.
@@ -47,6 +49,8 @@ vampGetPluginDescriptor(unsigned int version, unsigned int index) {
 		return spectralcontrast.getDescriptor();
 	case 5:
 		return speechMusicSegmenter.getDescriptor();
+  case 6:
+    return peaks.getDescriptor();
 	default:
 		return 0;
 	}
