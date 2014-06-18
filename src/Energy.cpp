@@ -328,6 +328,7 @@ void
 Energy::reset()
 {
 	rmsEnergy.clear();
+  prevRMS=0;
 }
 
 Energy::FeatureSet
