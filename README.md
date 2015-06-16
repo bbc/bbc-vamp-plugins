@@ -43,7 +43,7 @@ page](https://github.com/bbcrd/bbc-vamp-plugins/releases).
   1. Segmentation
   1. Detection function
 
-## Binary installation
+## Binary installation (recommended)
 Download the correct plugin for your platform from the [releases
 page](https://github.com/bbcrd/bbc-vamp-plugins/releases) and extract the
 contents into the [Vamp system plugin
@@ -51,50 +51,93 @@ folder](http://vamp-plugins.org/download.html#install).
 
 ## Installation from source
 
-The following instructions are written for Linux and OS X systems. For
-installing on Windows, please follow the instructions where possible, but refer
-to [this
-document](http://code.soundsoftware.ac.uk/projects/vamp-plugin-sdk/wiki/mtp2)
-when compiling.
+### Linux (Ubuntu/Debian)
 
-#### Dependencies
-You will need a working C++ compiler. On OS X this is done by installing
-[XCode](http://developer.apple.com/xcode/). On Debian/Ubuntu, this can be done
-with the following command:
+Firstly you will need a C++ compiler:
 
     sudo apt-get install build-essential
 
-The Vamp SDK is required to compile the plugins. Download the main SDK from
-<http://vamp-plugins.org/develop.html> and extract the contents. Follow the
-installation instructions in build/README.linux or build/README.osx.
+Download the Vamp SDK
 
-#### Configuration
+    wget https://code.soundsoftware.ac.uk/attachments/download/1514/vamp-plugin-sdk-2.6.tar.gz
+    tar xvf vamp-plugin-sdk-2.6.tar.gz
+    cd vamp-plugin-sdk-2.6
 
-Simply edit 'Makefile.inc' and set `VAMP_SDK_DIR` to the directory containing
-the extracted and compiled Vamp SDK.
+Compile the SDK
 
-#### Compile
+    ./configure
+    make sdk
 
-With the project's folder as your working directory, compile the plugin using
-the following command for linux:
+In Makefile.inc, set VAMP\_SDK\_DIR to the SDK path
+
+    cd /path/to/bbc-vamp-plugins
+    nano Makefile.inc
+
+Build the plugin
 
     make -f Makefile.linux
 
-or the following command for OSX:
-
-    make -f Makefile.osx
-
-then install it by moving the plugin, category and RDF files to the system Vamp
-plugin folder (see [here](http://vamp-plugins.org/download.html#install) for
-defaults). Use the following command for linux:
+Install the plugin
 
     mv bbc-vamp-plugins.so bbc-vamp-plugins.cat bbc-vamp-plugins.n3 /usr/local/lib/vamp/
 
-or the following command for OSX:
+### OS/X
+
+Install [XCode](http://developer.apple.com/xcode/) if you haven't already.
+
+Download the Vamp SDK
+
+    wget https://code.soundsoftware.ac.uk/attachments/download/1514/vamp-plugin-sdk-2.6.tar.gz
+    tar xvf vamp-plugin-sdk-2.6.tar.gz
+    cd vamp-plugin-sdk-2.6
+
+Compile the SDK
+
+    make -f build/Makefile.osx sdk
+
+In Makefile.inc, set VAMP\_SDK\_DIR to the SDK path
+
+    cd /path/to/bbc-vamp-plugins
+    nano Makefile.inc
+
+Build the plugin
+
+    make -f Makefile.osx
+
+Install the plugin
 
     mv bbc-vamp-plugins.dylib bbc-vamp-plugins.cat bbc-vamp-plugins.n3 /Library/Audio/Plug-Ins/Vamp/
 
-#### Documentation
+### Windows (cross-compiled)
+
+To compile a Windows binary from a Linux environment, install MinGW:
+
+    sudo apt-get install mingw-w64
+
+Download the Vamp SDK
+
+    wget https://code.soundsoftware.ac.uk/attachments/download/1514/vamp-plugin-sdk-2.6.tar.gz
+    tar xvf vamp-plugin-sdk-2.6.tar.gz
+    cd vamp-plugin-sdk-2.6
+
+Compile the SDK
+
+    make -f build/Makefile.mingw32 sdk
+
+In Makefile.inc, set VAMP\_SDK\_DIR to the SDK path
+
+    cd /path/to/bbc-vamp-plugins
+    nano Makefile.inc
+
+Build the plugin
+
+    make -f Makefile.mingw
+
+Install the plugin by putting bbc-vamp-plugins.dll, bbc-vamp-plugins.cat and
+bbc-vamp-plugins.n3 in the [Vamp system plugin
+folder](http://vamp-plugins.org/download.html#install).
+
+## Documentation
 
 To generate the documentation, install [Doxygen](http://www.doxygen.org) and
 run the following command from the src folder. The documents will appear in

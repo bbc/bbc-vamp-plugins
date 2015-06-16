@@ -1,5 +1,5 @@
 # Edit this to the location of the Vamp plugin SDK, relative to your project directory
-VAMP_SDK_DIR := ../vamp-plugin-sdk-2.4
+VAMP_SDK_DIR := ../vamp-plugin-sdk-2.6
 
 PLUGIN_LIBRARY_NAME := bbc-vamp-plugins
 
