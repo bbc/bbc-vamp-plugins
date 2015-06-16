@@ -1,0 +1,24 @@
+include Makefile.inc
+
+PLUGIN_EXT := .dll
+PLUGIN      := $(PLUGIN_LIBRARY_NAME)$(PLUGIN_EXT)
+CXXFLAGS   := -I$(VAMP_SDK_DIR)
+LDFLAGS		:= $(LDFLAGS) -fno-exceptions -static -static-libgcc
+DYNAMIC_LDFLAGS		= -shared -Wl,-Bsymbolic
+PLUGIN_LDFLAGS		= $(DYNAMIC_LDFLAGS) -Wl,--retain-symbols-file=$(VAMP_SDK_DIR)/build/vamp-plugin.list
+PLUGIN_LIBS	= $(VAMP_SDK_DIR)/libvamp-sdk.a
+
+CXX         := i686-w64-mingw32-g++
+CC          := i686-w64-mingw32-gcc
+
+OBJECTS := $(SOURCES:.cpp=.o)
+OBJECTS := $(OBJECTS:.c=.o)
+
+$(PLUGIN):	$(OBJECTS)
+		$(CXX) $(LDFLAGS) $(PLUGIN_LDFLAGS) -o $@ $^ $(PLUGIN_LIBS)
+
+clean:		
+		rm $(OBJECTS)
+
+distclean:	clean
+		rm $(PLUGIN)
