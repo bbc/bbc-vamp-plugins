@@ -131,7 +131,7 @@ In Makefile.inc, set VAMP\_SDK\_DIR to the SDK path
 
 Build the plugin
 
-    make -f Makefile.mingw
+    make -f Makefile.mingw32
 
 Install the plugin by putting bbc-vamp-plugins.dll, bbc-vamp-plugins.cat and
 bbc-vamp-plugins.n3 in the [Vamp system plugin
